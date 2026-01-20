@@ -17,4 +17,4 @@ def test_customer_creation():
     # Assert
     assert customer.name == name
     assert customer.species == species
-    assert isinstance(customer.id, int)
+    assert isinstance(customer.customer_id, int)
