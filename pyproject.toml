@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "panda-spa"
+version = "0.1.0"
+description = "Python-based spa management system for managing spa services and bookings"
+requires-python = ">=3.11"
+dependencies = [
+  "pytest"
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
