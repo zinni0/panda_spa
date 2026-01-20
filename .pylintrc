@@ -1,0 +1,57 @@
+[MASTER]
+# Python version
+py-version=3.11
+
+# Dateien/Ordner, die ignoriert werden
+ignore=tests,__pycache__,.venv,venv
+
+# Maximale Anzahl an Meldungen pro Datei
+limit-inference-results=100
+
+[MESSAGES CONTROL]
+# Deaktivierte Warnungen (bewusst begründet)
+disable=
+    C0114,  # missing-module-docstring
+    C0115,  # missing-class-docstring
+    C0116,  # missing-function-docstring
+    R0903,  # too-few-public-methods
+    R0913,  # too-many-arguments
+    R0801   # duplicate-code
+
+[FORMAT]
+# Maximale Zeilenlänge
+max-line-length=88
+
+# Einrückung
+indent-string='    '
+
+[DESIGN]
+# Maximale Anzahl an Attributen in Klassen
+max-attributes=10
+
+# Maximale Anzahl an Methoden pro Klasse
+max-public-methods=20
+
+# Maximale Vererbungstiefe
+max-parents=7
+
+[CLASSES]
+# Erzwingt sauberes OOP
+valid-classmethod-first-arg=cls
+valid-metaclass-classmethod-first-arg=mcs
+
+[EXCEPTIONS]
+# Erlaubte generische Exceptions (für frühe Phase)
+overgeneral-exceptions=Exception,ValueError
+
+[TYPECHECK]
+# Erlaubt Deskriptoren & Metaprogrammierung
+generated-members=
+
+[REPORTS]
+# Kein unnötiger Abschlussreport
+reports=no
+
+[SCORE]
+# Mindestbewertung
+fail-under=8.0
