@@ -1,2 +1,2 @@
-pylint
-pytest
+pylint~=2.16
+pytest~=9.0
