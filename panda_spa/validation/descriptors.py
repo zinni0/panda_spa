@@ -1,6 +1,10 @@
 from typing import Optional, Type
 
 
+class ValidationError(Exception):
+    pass
+
+
 class RangeValueDescriptor:
     def __init__(
             self,
@@ -19,15 +23,15 @@ class RangeValueDescriptor:
 
     def __set__(self, instance: object, value: int) -> None:
         if value is None:
-            raise ValueError(f"{self.__name} cannot be None")
+            raise ValidationError(f"{self.__name} cannot be None")
 
         if self.__min_value is not None and value < self.__min_value:
-            raise ValueError(
+            raise ValidationError(
                 f"{self.__name} must be >= {self.__min_value}, got {value}"
             )
 
         if self.__max_value is not None and value > self.__max_value:
-            raise ValueError(
+            raise ValidationError(
                 f"{self.__name} must be <= {self.__max_value}, got {value}"
             )
 
