@@ -2,7 +2,12 @@ from typing import Optional, Type
 
 
 class RangeValueDescriptor:
-    def __init__(self, name: str, min_value: Optional[int] = None, max_value: Optional[int] = None) -> None:
+    def __init__(
+            self,
+            name: str,
+            min_value: Optional[int] = None,
+            max_value: Optional[int] = None
+    ) -> None:
         self.__name = name
         self.__min_value = min_value
         self.__max_value = max_value
