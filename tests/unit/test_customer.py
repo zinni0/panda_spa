@@ -1,4 +1,4 @@
-from panda_spa.core.customer import Customer
+from panda_spa.core import Customer
 
 
 def test_customer_creation():
