@@ -1,21 +1,17 @@
 from numbers import Real
 from typing import Optional, Type
 
+from panda_spa.core.config_loader import ConfigLoader
+
 
 class ValidationError(Exception):
     pass
 
 
 class RangeValueDescriptor:
-    def __init__(
-            self,
-            *,
-            min_value: Optional[Real] = None,
-            max_value: Optional[Real] = None
-    ) -> None:
+    def __init__(self, config_path: str) -> None:
         self.__name: Optional[str] = None
-        self.__min_value = min_value
-        self.__max_value = max_value
+        self.__config_path = config_path
 
     def __set_name__(self, owner: Type, name: str) -> None:
         self.__name = name
@@ -26,6 +22,11 @@ class RangeValueDescriptor:
         return instance.__dict__.get(self.__name)
 
     def __set__(self, instance: object, value: Real) -> None:
+        config = ConfigLoader.get(self.__config_path)
+
+        min_value = config.get("min")
+        max_value = config.get("max")
+
         if value is None:
             raise ValidationError(f"{self.__name} cannot be None")
 
@@ -34,14 +35,14 @@ class RangeValueDescriptor:
                 f"{self.__name} must be a numeric value, got {type(value).__name__}"
             )
 
-        if self.__min_value is not None and value < self.__min_value:
+        if min_value is not None and value < min_value:
             raise ValidationError(
-                f"{self.__name} must be >= {self.__min_value}, got {value}"
+                f"{self.__name} must be >= {min_value}, got {value}"
             )
 
-        if self.__max_value is not None and value > self.__max_value:
+        if max_value is not None and value > max_value:
             raise ValidationError(
-                f"{self.__name} must be <= {self.__max_value}, got {value}"
+                f"{self.__name} must be <= {max_value}, got {value}"
             )
 
         instance.__dict__[self.__name] = value
