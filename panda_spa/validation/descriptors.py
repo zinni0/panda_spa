@@ -9,13 +9,16 @@ class ValidationError(Exception):
 class RangeValueDescriptor:
     def __init__(
             self,
-            name: str,
+            *,
             min_value: Optional[Real] = None,
             max_value: Optional[Real] = None
     ) -> None:
-        self.__name = name
+        self.__name: Optional[str] = None
         self.__min_value = min_value
         self.__max_value = max_value
+
+    def __set_name__(self, owner: Type, name: str) -> None:
+        self.__name = name
 
     def __get__(self, instance: Optional[object], owner: Type) -> Optional[Real]:
         if instance is None:
