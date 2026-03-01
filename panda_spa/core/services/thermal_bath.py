@@ -6,7 +6,6 @@ from panda_spa.validation.descriptors import RangeValueDescriptor
 
 class ThermalBath(SpaService):
     temperature = RangeValueDescriptor(
-        name="temperature",
         min_value=30,
         max_value=40
     )
