@@ -1,6 +1,10 @@
-from flask import Flask, render_template, request, redirect, url_for
 from datetime import datetime
 
+from flask import Flask, render_template, request, redirect, url_for
+
+from panda_spa.core.config_loader import ConfigLoader
+from panda_spa.core.services import * # pylint: disable=unused-import
+from panda_spa.validation.metaclasses import ServiceRegistryMeta
 
 app = Flask(__name__)
 
@@ -15,14 +19,6 @@ species_list = [
     "Reh",
     "Hase",
     "Waschbär"
-]
-
-# Dienstleistungen (später DB)
-services = [
-    "Thermal Bad",
-    "Bambus Massage",
-    "Tee Therapie",
-    "Heiße Steine Spezial"
 ]
 
 # Buchungen (temporär)
@@ -50,7 +46,6 @@ def home():
 
 @app.route("/new-booking", methods=["GET", "POST"])
 def new_booking():
-
     error = None
 
     if request.method == "POST":
@@ -89,7 +84,7 @@ def new_booking():
     return render_template(
         "booking_new.html",
         species_list=species_list,
-        services=services,
+        services=list(ServiceRegistryMeta.registry.keys()),
         error=error
     )
 
@@ -125,4 +120,6 @@ def finances():
 
 
 if __name__ == "__main__":
+    ConfigLoader.load()
+
     app.run(debug=True)

@@ -8,7 +8,7 @@ class ConfigLoader:
     __config: dict[str, Any] = {}
 
     @classmethod
-    def load(cls, path: str) -> None:
+    def load(cls, path: str = "config/services.yaml") -> None:
         with open(Path(path), "r", encoding="utf-8") as file:
             cls.__config = yaml.safe_load(file)
 

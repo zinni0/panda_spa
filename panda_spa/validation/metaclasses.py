@@ -1,4 +1,7 @@
-class ServiceRegistryMeta(type):
+from abc import ABCMeta
+
+
+class ServiceRegistryMeta(ABCMeta):
     registry = {}
 
     def __new__(cls, name, bases, dct):
