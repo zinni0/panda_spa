@@ -8,8 +8,8 @@ from panda_spa.core import services
 from panda_spa.core.config_loader import ConfigLoader
 from panda_spa.validation.metaclasses import ServiceRegistryMeta
 
-for loader, name, is_pkg in pkgutil.iter_modules(services.__path__):
-    importlib.import_module(f"{services.__name__}.{name}")
+for loader, name_pkg, is_pkg in pkgutil.iter_modules(services.__path__):
+    importlib.import_module(f"{services.__name__}.{name_pkg}")
 
 app = Flask(__name__)
 
