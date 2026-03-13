@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Manage Bookings</h2>
+
+<table>
+
+    <thead>
+        <tr>
+            <th>Datum</th>
+            <th>Uhrzeit</th>
+            <th>Name</th>
+            <th>Tierart</th>
+            <th>Dienstleistung</th>
+            <th class="action-col">Aktion</th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+        {% for booking in bookings %}
+
+        <tr>
+            <td>{{ booking.date }}</td>
+            <td>{{ booking.time }}</td>
+            <td>{{ booking.name }}</td>
+            <td>{{ booking.species }}</td>
+            <td>{{ booking.service }}</td>
+
+            <td class="action-col">
+                <a class="delete-btn"
+                href="{{ url_for('delete_booking', index=loop.index0) }}"
+                onclick="return confirmDelete()">
+                Löschen
+                </a>
+            </td>
+        </tr>
+
+        {% endfor %}
+
+    </tbody>
+
+</table>
+
+<script>
+
+function confirmDelete() {
+    return confirm("Soll diese Buchung endgültig gelöscht werden?");
+}
+
+</script>
+
+{% endblock %}
