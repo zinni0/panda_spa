@@ -1,10 +1,15 @@
+import importlib
+import pkgutil
 from datetime import datetime
 
 from flask import Flask, render_template, request, redirect, url_for
 
+from panda_spa.core import services
 from panda_spa.core.config_loader import ConfigLoader
-from panda_spa.core.services import * # pylint: disable=unused-import
 from panda_spa.validation.metaclasses import ServiceRegistryMeta
+
+for loader, name, is_pkg in pkgutil.iter_modules(services.__path__):
+    importlib.import_module(f"{services.__name__}.{name}")
 
 app = Flask(__name__)
 

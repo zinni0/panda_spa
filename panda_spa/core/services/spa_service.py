@@ -20,7 +20,6 @@ class SpaService(ABC, metaclass=ServiceRegistryMeta):
     @abstractmethod
     def get_description(self) -> str:
         """Must be implemented from every Service"""
-        pass
 
     def to_dict(self) -> Dict[str, Any]:
         return {
