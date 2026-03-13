@@ -11,12 +11,13 @@ class UserSchema(BaseModel):
     )
 
     @validator("favorite_service")
-    def service_must_exist(cls, v, values, **kwargs):
-        if v:
+    def service_must_exist(cls, value, _values, **kwargs):  # pylint: disable=no-self-argument
+        if value:
             service_names = [s.name for s in kwargs.get("services", [])]
-            if v not in service_names:
-                raise ValueError(f"Favorite service '{v}' existiert nicht")
-        return v
+            if value not in service_names:
+                # pylint: disable=broad-exception-raised
+                raise ValueError(f"Favorite service '{value}' existiert nicht")
+        return value
 
     class Config:
         from_attributes = True

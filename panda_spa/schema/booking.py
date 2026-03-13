@@ -13,6 +13,7 @@ class BookingSchema(BaseModel):
     def end_must_be_after_start(cls, value, values):  # pylint: disable=no-self-argument
         start = values.get("start_time")
         if start and value <= start:
+            # pylint: disable=broad-exception-raised
             raise ValueError("Endzeit muss nach Startzeit liegen")
         return value
 
