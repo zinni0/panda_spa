@@ -11,7 +11,7 @@ class FinanceSchema(BaseModel):
     date: datetime = Field(default_factory=datetime.utcnow)
 
     @validator("type")
-    def type_must_be_valid(cls, value): # pylint: disable=no-self-argument
+    def type_must_be_valid(cls, value):  # pylint: disable=no-self-argument
         if value not in ("income", "expense"):
             # pylint: disable=broad-exception-raised
             raise ValueError("Typ muss 'income' oder 'expense' sein")
