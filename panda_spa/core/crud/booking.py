@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session, joinedload
 
-from panda_spa.models import Booking
+from panda_spa.models.booking import Booking
 from panda_spa.schema.booking import BookingSchema
 
 
