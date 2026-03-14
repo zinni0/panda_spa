@@ -35,7 +35,9 @@ class BookingManager:
             error = "Buchung darf nicht in der Vergangenheit liegen"
             return 422, error
 
-        overlapping = BookingManager.__find_bookings(db, booking_datetime, booking_endtime)
+        overlapping = BookingManager.__find_bookings(
+            db, booking_datetime, booking_endtime
+        )
 
         if overlapping:
             error = "Es existiert bereits ein Termin in diesem Zeitraum"

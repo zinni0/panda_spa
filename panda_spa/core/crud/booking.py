@@ -20,4 +20,6 @@ def create_booking(db: Session, booking: BookingSchema):
 
 
 def get_bookings(db: Session):
-    return db.query(Booking).options(joinedload(Booking.user)).order_by(Booking.start_time).all()
+    return db.query(Booking).options(
+        joinedload(Booking.user)
+    ).order_by(Booking.start_time).all()

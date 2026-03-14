@@ -76,8 +76,8 @@ def new_booking():
                     services=list(ServiceRegistryMeta.registry.keys()),
                     error=error
                 )
-            else:
-                return redirect(url_for("manage_bookings"))
+
+            return redirect(url_for("manage_bookings"))
 
     return render_template(
         "booking_new.html",
