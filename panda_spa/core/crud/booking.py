@@ -1,3 +1,5 @@
+from typing import Tuple
+
 from sqlalchemy.orm import Session, joinedload
 
 from panda_spa.models.booking import Booking
@@ -23,3 +25,13 @@ def get_bookings(db: Session):
     return db.query(Booking).options(
         joinedload(Booking.user)
     ).order_by(Booking.start_time).all()
+
+
+def delete_bookings(db: Session, booking_id: int) -> Tuple[str, str]:
+    booking = db.query(Booking).get(booking_id)
+    if booking:
+        db.delete(booking)
+        db.commit()
+        return "success", "Buchung erfolgreich gelöscht"
+
+    return "error", "Buchung nicht gefunden"

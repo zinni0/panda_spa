@@ -5,7 +5,7 @@ from flask import Flask, render_template, request, redirect, url_for
 
 from panda_spa import models
 from panda_spa.core import BookingFormData, BookingManager, services, ConfigLoader
-from panda_spa.core.crud.booking import get_bookings
+from panda_spa.core.crud.booking import get_bookings, delete_bookings
 from panda_spa.core.database import SessionLocal, Base, engine
 from panda_spa.validation import ServiceRegistryMeta
 
@@ -98,11 +98,12 @@ def manage_bookings():
         )
 
 
-@app.route("/delete-booking/<int:index>")
-def delete_booking(index):
+@app.route("/delete-booking/<int:booking_id>")
+def delete_booking(booking_id):
     """Löscht eine Buchung"""
-    if 0 <= index < len(bookings):
-        bookings.pop(index)
+    with SessionLocal() as db:
+        status, msg = delete_bookings(db, booking_id)
+        print(f"{status}: {msg}")
 
     return redirect(url_for("manage_bookings"))
 
