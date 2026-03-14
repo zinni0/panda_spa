@@ -1,0 +1,5 @@
+spa_services:
+  thermal_bath:
+    temperature:
+      min: 30
+      max: 40

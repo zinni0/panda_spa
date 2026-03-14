@@ -42,7 +42,7 @@ valid-metaclass-classmethod-first-arg=mcs
 
 [EXCEPTIONS]
 # Erlaubte generische Exceptions (für frühe Phase)
-overgeneral-exceptions=Exception,ValueError
+overgeneral-exceptions=builtins.Exception,builtins.ValueError
 
 [TYPECHECK]
 # Erlaubt Deskriptoren & Metaprogrammierung
@@ -54,4 +54,4 @@ reports=no
 
 [SCORE]
 # Mindestbewertung
-fail-under=8.0
+fail-under=9.5

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Panda Spa</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<header>
+    <h1>Panda Thermal Spa</h1>
+
+    <nav>
+        <a href="{{ url_for('new_booking') }}">Neue Buchung</a>
+        <a href="{{ url_for('manage_bookings') }}">Buchungen verwalten</a>
+        <a href="{{ url_for('finances') }}">Finanzen</a>
+    </nav>
+</header>
+
+<main>
+    {% block content %}
+    {% endblock %}
+</main>
+
+</body>
+</html>
