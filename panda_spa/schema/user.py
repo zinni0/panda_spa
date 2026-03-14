@@ -13,6 +13,7 @@ class UserSchema(BaseModel):
     )
 
     @field_validator("favorite_service")
+    @classmethod
     def service_must_exist(cls, value):  # pylint: disable=no-self-argument
         if value is None:
             return value
