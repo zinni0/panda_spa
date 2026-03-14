@@ -1,6 +1,8 @@
 from typing import Optional
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
+
+from panda_spa.validation.metaclasses import ServiceRegistryMeta
 
 
 class UserSchema(BaseModel):
@@ -10,13 +12,17 @@ class UserSchema(BaseModel):
         None, description="Name des Lieblingsservice"
     )
 
-    @validator("favorite_service")
-    def service_must_exist(cls, value, _values, **kwargs):  # pylint: disable=no-self-argument
-        if value:
-            service_names = [s.name for s in kwargs.get("services", [])]
-            if value not in service_names:
-                # pylint: disable=broad-exception-raised
-                raise ValueError(f"Favorite service '{value}' existiert nicht")
+    @field_validator("favorite_service")
+    def service_must_exist(cls, value):  # pylint: disable=no-self-argument
+        if value is None:
+            return value
+
+        service_names = list(ServiceRegistryMeta.registry.keys())
+
+        if value not in service_names:
+            # pylint: disable=broad-exception-raised
+            raise ValueError(f"booked service '{value}' does not exist")
+
         return value
 
     class Config:
