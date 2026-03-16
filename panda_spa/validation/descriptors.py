@@ -9,7 +9,6 @@ logger = logging.getLogger(__name__)
 
 class ValidationError(Exception):
     """Raised when validation of a descriptor value fails."""
-    pass
 
 
 class RangeValueDescriptor:
