@@ -1,3 +1,3 @@
 from .booking import BookingSchema
-from .finance import FinanceSchema
+from .finance import TransactionSchema
 from .user import UserSchema
