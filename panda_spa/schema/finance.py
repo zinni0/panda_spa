@@ -21,7 +21,9 @@ class TransactionSchema(BaseModel):
     description: Optional[str] = Field(
         "", description="Optional description of the transaction"
     )
-    date: datetime = Field(default_factory=datetime.utcnow, description="Transaction date")
+    date: datetime = Field(
+        default_factory=datetime.utcnow, description="Transaction date"
+    )
 
     class Config:
         from_attributes = True
