@@ -2,7 +2,7 @@ from datetime import datetime
 
 from sqlalchemy import Column, Integer, String, Float, DateTime
 
-from panda_spa.core.database import Base
+from panda_spa.db.database import Base
 
 
 class FinanceEntry(Base):

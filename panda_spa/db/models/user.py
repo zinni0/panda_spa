@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
 
-from panda_spa.core.database import Base
+from panda_spa.db.database import Base
 
 
 class User(Base):

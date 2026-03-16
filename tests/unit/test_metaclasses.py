@@ -3,12 +3,10 @@ import pytest
 from panda_spa.validation.metaclasses import ServiceRegistryMeta
 
 
-# Dummy-Basisklasse
 class SpaService(metaclass=ServiceRegistryMeta):
     pass
 
 
-# Testklasse für Registrierung
 class MassageService(SpaService):
     pass
 

@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from panda_spa.models.user import User
+from panda_spa.db.models.user import User
 from panda_spa.schema.user import UserSchema
 
 

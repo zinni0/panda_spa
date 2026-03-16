@@ -3,11 +3,10 @@ import pkgutil
 
 from flask import Flask, render_template, request, redirect, url_for
 
-from panda_spa import models
 from panda_spa.config import ConfigLoader
 from panda_spa.core import BookingFormData, BookingManager, services
-from panda_spa.core.database import SessionLocal, Base, engine
-from panda_spa.crud import get_bookings, delete_bookings
+from panda_spa.db import SessionLocal, Base, engine, models
+from panda_spa.db.crud import get_bookings, delete_bookings
 from panda_spa.validation import ServiceRegistryMeta
 
 for loader, name_pkg, is_pkg in pkgutil.iter_modules(services.__path__):
@@ -16,7 +15,7 @@ for loader, name_pkg, is_pkg in pkgutil.iter_modules(services.__path__):
 for loader, name_pkg, is_pkg in pkgutil.iter_modules(models.__path__):
     importlib.import_module(f"{models.__name__}.{name_pkg}")
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder="web/templates", static_folder="web/static")
 
 # -----------------------------
 # MOCK DATA (später DB ersetzen)

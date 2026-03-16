@@ -5,9 +5,8 @@ from typing import Tuple
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
-from panda_spa.crud.booking import create_booking
-from panda_spa.crud import create_user
-from panda_spa.models.booking import Booking
+from panda_spa.db.crud import create_booking, create_user
+from panda_spa.db.models import Booking
 from panda_spa.schema.booking import BookingSchema
 from panda_spa.schema.user import UserSchema
 
