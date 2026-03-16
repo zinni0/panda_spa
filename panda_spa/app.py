@@ -74,7 +74,7 @@ def new_booking():
                 return render_template(
                     "booking_new.html",
                     species_list=species_list,
-                    services=list(ServiceRegistryMeta.registry.keys()),
+                    services=list(ServiceRegistryMeta.get_registry().keys()),
                     error=error
                 )
 
@@ -83,7 +83,7 @@ def new_booking():
     return render_template(
         "booking_new.html",
         species_list=species_list,
-        services=list(ServiceRegistryMeta.registry.keys()),
+        services=list(ServiceRegistryMeta.get_registry().keys()),
         error=error
     )
 
