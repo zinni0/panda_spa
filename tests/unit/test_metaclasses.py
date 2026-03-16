@@ -35,6 +35,9 @@ def test_registry_contains_correct_class_objects():
 
 
 def test_double_registration_raises_error():
+    class DummyService(SpaService):
+        pass
+
     with pytest.raises(ValueError):
-        class MassageServiceDuplicate(SpaService):
-            __name__ = 'MassageService'
+        ServiceRegistryMeta._registry['DummyService'] = DummyService
+        ServiceRegistryMeta.__new__(ServiceRegistryMeta, 'DummyService', (SpaService,), {})
