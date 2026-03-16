@@ -2,7 +2,7 @@ import logging
 from numbers import Real
 from typing import Optional, Type
 
-from panda_spa.core.config_loader import ConfigLoader
+from panda_spa.config import ConfigLoader
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +21,13 @@ class RangeValueDescriptor:
 
     def __init__(self, config_path: str) -> None:
         self._name: Optional[str] = None
-        self._config = ConfigLoader.get(config_path)
+        self._config_path = config_path
+        self._config = None
+
+    def _get_config(self) -> dict:
+        if self._config is None:
+            self._config = ConfigLoader.get(self._config_path)
+        return self._config
 
     def __set_name__(self, owner: Type, name: str) -> None:
         """Store the attribute name when the descriptor is assigned."""
@@ -35,8 +41,10 @@ class RangeValueDescriptor:
 
     def __set__(self, instance: object, value: Real) -> None:
         """Validate and set the value."""
-        min_value = self._config.get("min")
-        max_value = self._config.get("max")
+        config = self._get_config()
+
+        min_value = config.get("min")
+        max_value = config.get("max")
 
         logger.debug("Validating value %s for %s", value, self._name)
 

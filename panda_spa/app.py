@@ -4,9 +4,10 @@ import pkgutil
 from flask import Flask, render_template, request, redirect, url_for
 
 from panda_spa import models
-from panda_spa.core import BookingFormData, BookingManager, services, ConfigLoader
-from panda_spa.core.crud.booking import get_bookings, delete_bookings
+from panda_spa.config import ConfigLoader
+from panda_spa.core import BookingFormData, BookingManager, services
 from panda_spa.core.database import SessionLocal, Base, engine
+from panda_spa.crud import get_bookings, delete_bookings
 from panda_spa.validation import ServiceRegistryMeta
 
 for loader, name_pkg, is_pkg in pkgutil.iter_modules(services.__path__):
