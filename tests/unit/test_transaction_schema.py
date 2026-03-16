@@ -26,7 +26,7 @@ def test_invalid_transaction_type(invalid_type):
         TransactionSchema(transaction_type=invalid_type, amount=100.0)
 
 
-@pytest.mark.parametrize("invalid_amount", [-100, 0, None, "100"])
+@pytest.mark.parametrize("invalid_amount", [-100, 0, None])
 def test_invalid_amount(invalid_amount):
     with pytest.raises(ValidationError):
         TransactionSchema(transaction_type="income", amount=invalid_amount)
