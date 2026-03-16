@@ -48,6 +48,9 @@ overgeneral-exceptions=builtins.Exception,builtins.ValueError
 # Erlaubt Deskriptoren & Metaprogrammierung
 generated-members=
 
+[VARIABLES]
+good-names=db
+
 [REPORTS]
 # Kein unnötiger Abschlussreport
 reports=no
