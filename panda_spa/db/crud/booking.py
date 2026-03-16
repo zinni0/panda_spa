@@ -2,8 +2,8 @@ from typing import Tuple
 
 from sqlalchemy.orm import Session, joinedload
 
-from panda_spa.db.models.booking import Booking
-from panda_spa.schema.booking import BookingSchema
+from panda_spa.db.models import Booking
+from panda_spa.schema import BookingSchema
 
 
 def create_booking(db: Session, booking: BookingSchema):

@@ -7,8 +7,7 @@ from sqlalchemy.orm import Session
 
 from panda_spa.db.crud import create_booking, create_user
 from panda_spa.db.models import Booking
-from panda_spa.schema.booking import BookingSchema
-from panda_spa.schema.user import UserSchema
+from panda_spa.schema import BookingSchema, UserSchema
 
 
 @dataclass

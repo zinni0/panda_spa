@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 
-from panda_spa.db.models.user import User
-from panda_spa.schema.user import UserSchema
+from panda_spa.db.models import User
+from panda_spa.schema import UserSchema
 
 
 def create_user(db: Session, user: UserSchema):

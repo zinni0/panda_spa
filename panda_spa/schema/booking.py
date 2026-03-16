@@ -2,7 +2,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field, field_validator
 
-from panda_spa.validation.metaclasses import ServiceRegistryMeta
+from panda_spa.validation import ServiceRegistryMeta
 
 
 class BookingSchema(BaseModel):
@@ -26,7 +26,7 @@ class BookingSchema(BaseModel):
         if value is None:
             return value
 
-        service_names = list(ServiceRegistryMeta.registry.keys())
+        service_names = list(ServiceRegistryMeta.get_registry().keys())
 
         if value not in service_names:
             # pylint: disable=broad-exception-raised

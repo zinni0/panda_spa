@@ -1,6 +1,6 @@
 import pytest
 
-from panda_spa.validation.metaclasses import ServiceRegistryMeta
+from panda_spa.validation import ServiceRegistryMeta
 
 
 class SpaService(metaclass=ServiceRegistryMeta):
