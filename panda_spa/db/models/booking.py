@@ -5,6 +5,14 @@ from panda_spa.db.database import Base
 
 
 class Booking(Base):
+    """
+    Represents a booking made by a user for a spa service.
+
+    :var user_id: ID of the booking user
+    :var service_name: Name of the booked service
+    :var start_time: Start datetime of the booking
+    :var end_time: End datetime of the booking
+    """
     __tablename__ = "bookings"
 
     id = Column(Integer, primary_key=True)
