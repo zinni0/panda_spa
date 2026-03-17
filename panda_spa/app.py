@@ -17,10 +17,6 @@ for loader, name_pkg, is_pkg in pkgutil.iter_modules(models.__path__):
 
 app = Flask(__name__, template_folder="web/templates", static_folder="web/static")
 
-# -----------------------------
-# MOCK DATA (später DB ersetzen)
-# -----------------------------
-
 # Tierarten (werden später aus DB geladen)
 species_list = [
     "Panda",
@@ -29,9 +25,6 @@ species_list = [
     "Hase",
     "Waschbär"
 ]
-
-# Buchungen (temporär)
-bookings = []
 
 """
 Ersetzen z.B. mit:
