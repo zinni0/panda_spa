@@ -9,8 +9,8 @@ class ThermalBath(SpaService):
         config_path="spa_service.thermal_bath.temperature"
     )
 
-    def __init__(self, price: float, duration: int, temperature: int):
-        super().__init__(price=price, duration=duration)
+    def __init__(self, price: float, cost: float, duration: int, temperature: int):
+        super().__init__(price=price, cost=cost, duration=duration)
         self.temperature = temperature
 
     def get_description(self) -> str:
