@@ -16,7 +16,7 @@ for loader, name_pkg, is_pkg in pkgutil.iter_modules(models.__path__):
     importlib.import_module(f"{models.__name__}.{name_pkg}")
 
 app = Flask(__name__, template_folder="web/templates", static_folder="web/static")
-
+#test
 # Tierarten (werden später aus DB geladen)
 species_list = [
     "Panda",
