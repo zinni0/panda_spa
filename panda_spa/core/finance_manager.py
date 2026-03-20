@@ -35,7 +35,9 @@ class FinanceManager:
             )
 
         except ValidationError as exc:
-            error_massages = "; ".join([f"{err['loc'][0]}: {err['msg']}" for err in exc.errors()])
+            error_massages = "; ".join(
+                [f"{err['loc'][0]}: {err['msg']}" for err in exc.errors()]
+            )
             return 400, error_massages
 
         create_transaction(db, transaction_schema)
