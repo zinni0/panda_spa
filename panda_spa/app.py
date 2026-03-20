@@ -5,12 +5,13 @@ from flask import Flask, render_template, request, redirect, url_for
 from sqlalchemy import func
 
 from panda_spa.config import ConfigLoader
-from panda_spa.core import BookingFormData, BookingManager, services, SpaServiceFactory
+from panda_spa.core import BookingFormData, BookingManager, services, SpaServiceFactory, \
+    FinanceFormData, FinanceManager
 from panda_spa.db import SessionLocal, Base, engine, models
-from panda_spa.db.crud import delete_transaction, get_booking_by_id, set_booking_paid, get_bookings, \
+from panda_spa.db.crud import delete_transaction, get_booking_by_id, get_bookings, \
     delete_bookings
-from panda_spa.db.models.finance import \
-    FinanceEntry  # wenn es finance crud gibt brauchen wir das nicht mehr
+# wenn es finance crud gibt brauchen wir das nicht mehr
+from panda_spa.db.models.finance import FinanceEntry
 from panda_spa.validation import ServiceRegistryMeta
 
 for loader, name_pkg, is_pkg in pkgutil.iter_modules(services.__path__):
@@ -108,33 +109,29 @@ def render_new_income(booking_id):
         service = SpaServiceFactory.create(booking.service_name)
         base_price = service.to_dict().get("price")
 
-        if request.method == "POST":
-            discount = float(request.form.get("discount") or 0)
-            tip = float(request.form.get("tip") or 0)
-            note = request.form.get("note")
-
-            total = base_price - discount + tip
-
-            # FinanceEntry erstellen (Einnahme)
-            finance_entry = FinanceEntry(
-                type="income",
-                amount=total,
-                description=f"{booking.service_name}|{booking.user.name}|Rabatt={discount}|Trinkgeld={tip}|Notiz={note}"
+        if not request.method == "POST":
+            return render_template(
+                "income_new.html",
+                booking=booking,
+                base_price=base_price
             )
 
-            # Finance CRUD wäre wahrscheinlich sinnvoller
-            db.add(finance_entry)
-            db.commit()
+        discount = float(request.form.get("discount") or 0)
+        tip = float(request.form.get("tip") or 0)
 
-            set_booking_paid(db, booking_id)
-
-            return redirect(url_for("render_manage_bookings"))
-
-        return render_template(
-            "income_new.html",
-            booking=booking,
-            base_price=base_price
+        form_data = FinanceFormData(
+            type="income",
+            amount=(base_price + tip) - discount,
+            description=(request.form.get("note") or "No description")
         )
+
+        status_code, error = FinanceManager.create_transaction(db, form_data, booking_id)
+
+        if status_code != 200:
+            # Konrad, hier musst du nochmal ran, hier fehlt die Anzeige von Errors
+            raise RuntimeError(error)
+
+        return redirect(url_for("render_manage_bookings"))
 
 
 @app.route("/finances")
@@ -159,20 +156,21 @@ def render_finances():
 
         transactions = query.order_by(FinanceEntry.date).all()
 
-        return render_template(
-            "finances.html",
-            total_income=round(total_income, 2),
-            total_expense=round(total_expense, 2),
-            profit=round(profit, 2),
-            transactions=transactions,
-            active_filter=filter_type
-        )
+    return render_template(
+        "finances.html",
+        total_income=round(total_income, 2),
+        total_expense=round(total_expense, 2),
+        profit=round(profit, 2),
+        transactions=transactions,
+        active_filter=filter_type
+    )
 
 
 @app.route("/delete-transaction/<int:transaction_id>")
 def render_delete_transaction(transaction_id):
     with SessionLocal() as db:
-        delete_transaction(db, transaction_id)
+        status, msg = delete_transaction(db, transaction_id)
+        print(f"{status}: {msg}")
 
     return redirect(url_for("render_finances"))
 
@@ -187,21 +185,19 @@ def render_new_expense():
         return render_template("expense_new.html")
 
     with SessionLocal() as db:
-        amount = float(request.form.get("amount") or 0)
-        note = request.form.get("note")
-
-        # Validierung ergänzen? → RICHARD ABSPRACHE
-
-        finance_entry = FinanceEntry(
+        form_data = FinanceFormData(
             type="expense",
-            amount=amount,
-            description=note or "No description"
+            amount=float(request.form.get("amount") or 0),
+            description=(request.form.get("note") or "No description")
         )
 
-        db.add(finance_entry)
-        db.commit()
+        status_code, error = FinanceManager.create_transaction(db, form_data)
 
-    return redirect(url_for("render_finances"))
+        if status_code != 200:
+            # Konrad, hier musst du nochmal ran, hier fehlt die Anzeige von Errors
+            raise RuntimeError(error)
+
+        return redirect(url_for("render_finances"))
 
 
 if __name__ == "__main__":
