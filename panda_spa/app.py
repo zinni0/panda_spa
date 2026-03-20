@@ -42,48 +42,46 @@ def render_home():
 
 @app.route("/new-booking", methods=["GET", "POST"])
 def render_new_booking():
-    error = None
+    if not request.method == "POST":
+        return render_template(
+            "booking_new.html",
+            species_list=species_list,
+            services=list(ServiceRegistryMeta.get_registry().keys()),
+            error=None
+        )
 
-    if request.method == "POST":
-        with SessionLocal() as db:
-            form_data = BookingFormData(
-                name=request.form.get("name"),
-                species=request.form.get("species"),
-                date=request.form.get("date"),
-                time=request.form.get("time"),
-                service=request.form.get("service")
+    with SessionLocal() as db:
+        form_data = BookingFormData(
+            name=request.form.get("name"),
+            species=request.form.get("species"),
+            date=request.form.get("date"),
+            time=request.form.get("time"),
+            service=request.form.get("service")
+        )
+
+        status_code, error = BookingManager.create_booking(db, form_data)
+
+        if status_code != 200:
+            return render_template(
+                "booking_new.html",
+                species_list=species_list,
+                services=list(ServiceRegistryMeta.get_registry().keys()),
+                error=error
             )
 
-            status_code, error = BookingManager.create_booking(db, form_data)
-
-            if status_code != 200:
-                return render_template(
-                    "booking_new.html",
-                    species_list=species_list,
-                    services=list(ServiceRegistryMeta.get_registry().keys()),
-                    error=error
-                )
-
-            return redirect(url_for("render_manage_bookings"))
-
-    return render_template(
-        "booking_new.html",
-        species_list=species_list,
-        services=list(ServiceRegistryMeta.get_registry().keys()),
-        error=error
-    )
+        return redirect(url_for("render_manage_bookings"))
 
 
 @app.route("/manage-bookings")
 def render_manage_bookings():
     """Zeigt alle Buchungen sortiert nach Datum und Uhrzeit"""
     with SessionLocal() as db:
-        sorted_bookings = get_bookings(
-            db)  # Sorting doch egal oder? get_bookings ist doch schon sortiert(?)
-        return render_template(
-            "bookings_manage.html",
-            bookings=sorted_bookings
-        )
+        sorted_bookings = get_bookings(db)
+
+    return render_template(
+        "bookings_manage.html",
+        bookings=sorted_bookings
+    )
 
 
 @app.route("/delete-booking/<int:booking_id>")
@@ -185,25 +183,25 @@ def render_new_expense():
     Neue Betriebsausgabe erstellen
     """
 
-    if request.method == "POST":
-        with SessionLocal() as db:
-            amount = float(request.form.get("amount") or 0)
-            note = request.form.get("note")
+    if not request.method == "POST":
+        return render_template("expense_new.html")
 
-            # Validierung ergänzen? → RICHARD ABSPRACHE
+    with SessionLocal() as db:
+        amount = float(request.form.get("amount") or 0)
+        note = request.form.get("note")
 
-            finance_entry = FinanceEntry(
-                type="expense",
-                amount=amount,
-                description=note or "No description"
-            )
+        # Validierung ergänzen? → RICHARD ABSPRACHE
 
-            db.add(finance_entry)
-            db.commit()
+        finance_entry = FinanceEntry(
+            type="expense",
+            amount=amount,
+            description=note or "No description"
+        )
 
-        return redirect(url_for("render_finances"))
+        db.add(finance_entry)
+        db.commit()
 
-    return render_template("expense_new.html")
+    return redirect(url_for("render_finances"))
 
 
 if __name__ == "__main__":
