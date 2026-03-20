@@ -1,16 +1,17 @@
 import importlib
 import pkgutil
-import re # brauchen wir für Umwandlung service_name in service_tag
 
 from flask import Flask, render_template, request, redirect, url_for
 from sqlalchemy import func
 
 from panda_spa.config import ConfigLoader
 from panda_spa.core import BookingFormData, BookingManager, services
+from panda_spa.core.SpaServiceFactory import SpaServiceFactory
 from panda_spa.db import SessionLocal, Base, engine, models
-from panda_spa.db.models.finance import FinanceEntry #wenn es finance crud gibt brauchen wir das nicht mehr
-from panda_spa.db.crud import get_bookings, delete_bookings
 from panda_spa.db.crud import delete_transaction as delete_transaction_db
+from panda_spa.db.crud import get_bookings, delete_bookings
+from panda_spa.db.models.finance import \
+    FinanceEntry  # wenn es finance crud gibt brauchen wir das nicht mehr
 from panda_spa.validation import ServiceRegistryMeta
 
 for loader, name_pkg, is_pkg in pkgutil.iter_modules(services.__path__):
@@ -20,7 +21,7 @@ for loader, name_pkg, is_pkg in pkgutil.iter_modules(models.__path__):
     importlib.import_module(f"{models.__name__}.{name_pkg}")
 
 app = Flask(__name__, template_folder="web/templates", static_folder="web/static")
-#test
+# test
 # Tierarten (werden später aus DB geladen?) → Absprechen
 species_list = [
     "Panda",
@@ -88,7 +89,8 @@ def new_booking():
 def manage_bookings():
     """Zeigt alle Buchungen sortiert nach Datum und Uhrzeit"""
     with SessionLocal() as db:
-        sorted_bookings = get_bookings(db) # Sorting doch egal oder? get_bookings ist doch schon sortiert(?)
+        sorted_bookings = get_bookings(
+            db)  # Sorting doch egal oder? get_bookings ist doch schon sortiert(?)
         return render_template(
             "bookings_manage.html",
             bookings=sorted_bookings
@@ -114,21 +116,15 @@ def new_income(booking_id):
     with SessionLocal() as db:
 
         # Buchung laden
-        booking = db.get(models.Booking, booking_id) # Wir brauchen noch eine Funktion get_booking, also einzeln!
+        booking = db.get(models.Booking,
+                         booking_id)  # Wir brauchen noch eine Funktion get_booking, also einzeln!
         if not booking:
             return "Booking not found", 404
 
-        # Preis aus config laden (Namen müssen passen → MIT RICHARD ABSPRECHEN)
-        service_key = re.sub(r'(?<!^)(?=[A-Z])', '_', booking.service_name).lower()
-
-        # Finance CRUD wäre wahrscheinlich sinnvoller
-        base_price = ConfigLoader.get(
-            f"spa_services.{service_key}.price",
-            default=0
-        )
+        service = SpaServiceFactory.create(booking.service_name)
+        base_price = service.to_dict()["price"]
 
         if request.method == "POST":
-
             discount = float(request.form.get("discount") or 0)
             tip = float(request.form.get("tip") or 0)
             note = request.form.get("note")
@@ -171,7 +167,7 @@ def finances():
 
         profit = total_income - total_expense
 
-        query = db.query(FinanceEntry) # Wir brauchen auch getTransaction, also einzeln!
+        query = db.query(FinanceEntry)  # Wir brauchen auch getTransaction, also einzeln!
 
         if filter_type in ["income", "expense"]:
             query = query.filter(FinanceEntry.type == filter_type)
@@ -204,7 +200,6 @@ def new_expense():
 
     if request.method == "POST":
         with SessionLocal() as db:
-
             amount = float(request.form.get("amount") or 0)
             note = request.form.get("note")
 

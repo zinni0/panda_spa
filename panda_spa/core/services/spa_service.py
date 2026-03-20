@@ -19,8 +19,8 @@ class SpaService(ABC, metaclass=ServiceRegistryMeta):
         if duration <= 0:
             raise ValueError("duration must be positive")
 
-        self.price = price
-        self.duration = duration
+        self._price = price
+        self._duration = duration
 
     @property
     def name(self) -> str:
@@ -35,7 +35,6 @@ class SpaService(ABC, metaclass=ServiceRegistryMeta):
         """Serialize service to dictionary"""
         return {
             "service_type": type(self).__name__,
-            "name": self.name,
-            "price": self.price,
-            "duration": self.duration,
+            "price": self._price,
+            "duration": self._duration,
         }
