@@ -5,11 +5,10 @@ from flask import Flask, render_template, request, redirect, url_for
 from sqlalchemy import func
 
 from panda_spa.config import ConfigLoader
-from panda_spa.core import BookingFormData, BookingManager, services
-from panda_spa.core.SpaServiceFactory import SpaServiceFactory
+from panda_spa.core import BookingFormData, BookingManager, services, SpaServiceFactory
 from panda_spa.db import SessionLocal, Base, engine, models
-from panda_spa.db.crud import delete_transaction as delete_transaction_db
-from panda_spa.db.crud import get_bookings, delete_bookings
+from panda_spa.db.crud import delete_transaction, get_booking_by_id, set_booking_paid, get_bookings, \
+    delete_bookings
 from panda_spa.db.models.finance import \
     FinanceEntry  # wenn es finance crud gibt brauchen wir das nicht mehr
 from panda_spa.validation import ServiceRegistryMeta
@@ -21,8 +20,7 @@ for loader, name_pkg, is_pkg in pkgutil.iter_modules(models.__path__):
     importlib.import_module(f"{models.__name__}.{name_pkg}")
 
 app = Flask(__name__, template_folder="web/templates", static_folder="web/static")
-# test
-# Tierarten (werden später aus DB geladen?) → Absprechen
+
 species_list = [
     "Panda",
     "Fuchs",
@@ -31,28 +29,19 @@ species_list = [
     "Waschbär"
 ]
 
-"""
-Ersetzen z.B. mit:
-get_species()
-get_services()
-get_bookings()
-create_booking()
-delete_booking()
-"""
-
 
 # -----------------------------
 # ROUTEN
 # -----------------------------
 
 @app.route("/")
-def home():
+def render_home():
     """Startseite -> Neue Buchung"""
-    return redirect(url_for("new_booking"))
+    return redirect(url_for("render_new_booking"))
 
 
 @app.route("/new-booking", methods=["GET", "POST"])
-def new_booking():
+def render_new_booking():
     error = None
 
     if request.method == "POST":
@@ -75,7 +64,7 @@ def new_booking():
                     error=error
                 )
 
-            return redirect(url_for("manage_bookings"))
+            return redirect(url_for("render_manage_bookings"))
 
     return render_template(
         "booking_new.html",
@@ -86,7 +75,7 @@ def new_booking():
 
 
 @app.route("/manage-bookings")
-def manage_bookings():
+def render_manage_bookings():
     """Zeigt alle Buchungen sortiert nach Datum und Uhrzeit"""
     with SessionLocal() as db:
         sorted_bookings = get_bookings(
@@ -98,31 +87,28 @@ def manage_bookings():
 
 
 @app.route("/delete-booking/<int:booking_id>")
-def delete_booking(booking_id):
+def render_delete_booking(booking_id):
     """Löscht eine Buchung"""
     with SessionLocal() as db:
         status, msg = delete_bookings(db, booking_id)
         print(f"{status}: {msg}")
 
-    return redirect(url_for("manage_bookings"))
+    return redirect(url_for("render_manage_bookings"))
 
 
 @app.route("/new-income/<int:booking_id>", methods=["GET", "POST"])
-def new_income(booking_id):
+def render_new_income(booking_id):
     """
     Erstellt eine Abrechnung für eine Buchung
     """
 
     with SessionLocal() as db:
-
-        # Buchung laden
-        booking = db.get(models.Booking,
-                         booking_id)  # Wir brauchen noch eine Funktion get_booking, also einzeln!
+        booking = get_booking_by_id(db, booking_id)
         if not booking:
             return "Booking not found", 404
 
         service = SpaServiceFactory.create(booking.service_name)
-        base_price = service.to_dict()["price"]
+        base_price = service.to_dict().get("price")
 
         if request.method == "POST":
             discount = float(request.form.get("discount") or 0)
@@ -140,10 +126,11 @@ def new_income(booking_id):
 
             # Finance CRUD wäre wahrscheinlich sinnvoller
             db.add(finance_entry)
-            booking.service_name += " (BEZAHLT)"
             db.commit()
 
-            return redirect(url_for("manage_bookings"))
+            set_booking_paid(db, booking_id)
+
+            return redirect(url_for("render_manage_bookings"))
 
         return render_template(
             "income_new.html",
@@ -153,7 +140,7 @@ def new_income(booking_id):
 
 
 @app.route("/finances")
-def finances():
+def render_finances():
     filter_type = request.args.get("type") or "all"
     # Finance CRUD wäre wahrscheinlich sinnvoller (Filterfunktionen)
     with SessionLocal() as db:
@@ -185,15 +172,15 @@ def finances():
 
 
 @app.route("/delete-transaction/<int:transaction_id>")
-def delete_transaction(transaction_id):
+def render_delete_transaction(transaction_id):
     with SessionLocal() as db:
-        delete_transaction_db(db, transaction_id)
+        delete_transaction(db, transaction_id)
 
-    return redirect(url_for("finances"))
+    return redirect(url_for("render_finances"))
 
 
 @app.route("/new-expense", methods=["GET", "POST"])
-def new_expense():
+def render_new_expense():
     """
     Neue Betriebsausgabe erstellen
     """
@@ -214,7 +201,7 @@ def new_expense():
             db.add(finance_entry)
             db.commit()
 
-        return redirect(url_for("finances"))
+        return redirect(url_for("render_finances"))
 
     return render_template("expense_new.html")
 

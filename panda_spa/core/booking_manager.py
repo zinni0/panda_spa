@@ -5,6 +5,7 @@ from typing import Tuple
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
+from panda_spa.core.spa_service_factory import SpaServiceFactory
 from panda_spa.db.crud import create_booking, create_user
 from panda_spa.db.models import Booking
 from panda_spa.schema import BookingSchema, UserSchema
@@ -24,10 +25,12 @@ class BookingManager:
     def create_booking(db: Session, data: BookingFormData) -> Tuple[int, str | None]:
         error = None
 
+        service = SpaServiceFactory.create(data.service)
+
         booking_datetime = datetime.strptime(
             f"{data.date} {data.time}", "%Y-%m-%d %H:%M"
         )
-        booking_endtime = booking_datetime + timedelta(minutes=30)
+        booking_endtime = booking_datetime + timedelta(minutes=service.to_dict().get("duration"))
 
         if booking_datetime < datetime.now():
             error = "Buchung darf nicht in der Vergangenheit liegen"

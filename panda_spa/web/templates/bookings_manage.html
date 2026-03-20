@@ -30,13 +30,13 @@
 
             <td class="action-col">
                 <a class="delete-btn"
-                   href="{{ url_for('delete_booking', booking_id=booking.id) }}"
+                   href="{{ url_for('render_delete_booking', booking_id=booking.id) }}"
                    onclick="return confirm('Soll diese Buchung endgültig gelöscht werden?')">
                     Löschen
                 </a>
 
                 <a class="billing-btn"
-                    href="{{ url_for('new_income', booking_id=booking.id) }}">
+                    href="{{ url_for('render_new_income', booking_id=booking.id) }}">
                     Abrechnen
                 </a>
             </td>

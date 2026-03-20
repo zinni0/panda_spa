@@ -4,7 +4,7 @@
 
 <div class="card">
     <h2>Finanzen</h2>
-    <a href="{{ url_for('new_expense') }}" class="expense-btn">
+    <a href="{{ url_for('render_new_expense') }}" class="expense-btn">
         Neue Betriebsausgabe
     </a>
     <p>
@@ -32,17 +32,17 @@
 <p>
 <div class="filter-bar">
 
-    <a href="{{ url_for('finances') }}"
+    <a href="{{ url_for('render_finances') }}"
        class="filter-btn {% if active_filter == 'all' %}active{% endif %}">
         Alle
     </a>
 
-    <a href="{{ url_for('finances', type='income') }}"
+    <a href="{{ url_for('render_finances', type='income') }}"
        class="filter-btn {% if active_filter == 'income' %}active{% endif %}">
         Einnahmen
     </a>
 
-    <a href="{{ url_for('finances', type='expense') }}"
+    <a href="{{ url_for('render_finances', type='expense') }}"
        class="filter-btn {% if active_filter == 'expense' %}active{% endif %}">
         Ausgaben
     </a>
@@ -78,7 +78,7 @@
             <td>{{ t.amount }} €</td>
             <td>{{ t.description }}</td>
             <td class="action-col">
-                <a href="{{ url_for('delete_transaction', transaction_id=t.id) }}"
+                <a href="{{ url_for('render_delete_transaction', transaction_id=t.id) }}"
                     class="delete-btn"
                     onclick="return confirm('Transaktion löschen?')">
                     Löschen

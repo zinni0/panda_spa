@@ -18,11 +18,14 @@ class BookingSchema(BaseModel):
     :var service_name: Name of the booked service, must exist in the registry.
     :var start_time: Start time of the booking.
     :var end_time: End time of the booking, must be after start_time.
+    :var is_paid: True if the booking has been paid, False if payment is still pending.
     """
     user_id: int = Field(..., gt=0, description="id of the user")
     service_name: str = Field(..., description="name of the booked service")
     start_time: datetime = Field(..., description="start time of the booking")
     end_time: datetime = Field(..., description="end time of the booking")
+    is_paid: bool = Field(default=False,
+                          description="True if the booking has been paid, False otherwise")
 
     @classmethod
     def _get_service_names(cls) -> Set[str]:

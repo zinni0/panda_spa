@@ -43,6 +43,18 @@ def get_bookings(db: Session):
     ).order_by(Booking.start_time).all()
 
 
+def get_booking_by_id(db: Session, booking_id: int) -> Booking | None:
+    """
+    Get a booking by its ID, including user info
+
+    :param db: SQLAlchemy session object
+    :param booking_id: ID of the booking
+    :return: Booking object or None if not found
+    """
+    return db.query(Booking).options(joinedload(Booking.user)).filter(
+        Booking.id == booking_id).first()
+
+
 def delete_bookings(db: Session, booking_id: int) -> Tuple[str, str]:
     """
     Delete a booking by its ID
@@ -60,3 +72,25 @@ def delete_bookings(db: Session, booking_id: int) -> Tuple[str, str]:
 
     logger.warning("Booking %s not found", booking_id)
     return "error", "Booking not found"
+
+
+def set_booking_paid(db: Session, booking_id: int, paid: bool = True) -> Tuple[str, str]:
+    """
+    Update the payment status of a booking
+
+    :param db: SQLAlchemy session object
+    :param booking_id: ID of the booking
+    :param paid: True to mark as paid, False to mark as unpaid
+    :return: Tuple containing status ('success' or 'error') and a message
+    """
+    booking = db.query(Booking).get(booking_id)
+    if not booking:
+        logger.warning("Booking %s not found", booking_id)
+        return "error", "Booking not found"
+
+    booking.is_paid = paid
+    db.commit()
+    db.refresh(booking)
+    status = "paid" if paid else "unpaid"
+    logger.info("Booking %s marked as %s", booking_id, status)
+    return "success", f"Booking {booking_id} marked as {status}"

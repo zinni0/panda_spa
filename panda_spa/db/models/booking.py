@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, ForeignKey, String, DateTime
+from sqlalchemy import Column, Integer, ForeignKey, String, DateTime, Boolean
 from sqlalchemy.orm import relationship
 
 from panda_spa.db.database import Base
@@ -12,6 +12,8 @@ class Booking(Base):
     :var service_name: Name of the booked service
     :var start_time: Start datetime of the booking
     :var end_time: End datetime of the booking
+    :var is_paid: Boolean indicating if the booking has been paid
+    True = paid, False = unpaid/open
     """
     __tablename__ = "bookings"
 
@@ -20,5 +22,6 @@ class Booking(Base):
     service_name = Column(String, nullable=False)
     start_time = Column(DateTime, nullable=False)
     end_time = Column(DateTime, nullable=False)
+    is_paid = Column(Boolean, default=False, nullable=False)
 
     user = relationship("User", back_populates="bookings")
