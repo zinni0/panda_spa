@@ -74,7 +74,11 @@ def delete_bookings(db: Session, booking_id: int) -> Tuple[str, str]:
     return "error", "Booking not found"
 
 
-def set_booking_paid(db: Session, booking_id: int, paid: bool = True) -> Tuple[str, str]:
+def set_booking_paid(
+        db: Session,
+        booking_id: int,
+        paid: bool = True
+) -> Tuple[str, str]:
     """
     Update the payment status of a booking
 

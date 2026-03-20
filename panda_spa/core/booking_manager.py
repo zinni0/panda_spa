@@ -30,7 +30,9 @@ class BookingManager:
         booking_datetime = datetime.strptime(
             f"{data.date} {data.time}", "%Y-%m-%d %H:%M"
         )
-        booking_endtime = booking_datetime + timedelta(minutes=service.to_dict().get("duration"))
+        booking_endtime = booking_datetime + timedelta(
+            minutes=service.to_dict().get("duration")
+        )
 
         if booking_datetime < datetime.now():
             error = "Buchung darf nicht in der Vergangenheit liegen"
