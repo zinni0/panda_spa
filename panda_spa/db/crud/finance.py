@@ -31,14 +31,20 @@ def create_transaction(db: Session, transaction: TransactionSchema) -> FinanceEn
     return db_transaction
 
 
-def get_transactions(db: Session):
+def get_transactions(db: Session, filter_type: str = None):
     """
     Return all transactions ordered by date
 
     :param db: SQLAlchemy session object
+    :param filter_type: Optional filter for query
     :return: List of FinanceEntry objects
     """
-    return db.query(FinanceEntry).order_by(FinanceEntry.date).all()
+    query = db.query(FinanceEntry)
+
+    if filter_type in ["income", "expense"]:
+        query = query.filter(FinanceEntry.type == filter_type)
+
+    return query.order_by(FinanceEntry.date).all()
 
 
 def delete_transaction(db: Session, transaction_id: int) -> Tuple[str, str]:

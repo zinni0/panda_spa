@@ -2,16 +2,24 @@ import importlib
 import pkgutil
 
 from flask import Flask, render_template, request, redirect, url_for
-from sqlalchemy import func
 
 from panda_spa.config import ConfigLoader
-from panda_spa.core import BookingFormData, BookingManager, services, SpaServiceFactory, \
-    FinanceFormData, FinanceManager
+from panda_spa.core import (
+    BookingFormData,
+    BookingManager,
+    services,
+    SpaServiceFactory,
+    FinanceFormData,
+    FinanceManager
+)
 from panda_spa.db import SessionLocal, Base, engine, models
-from panda_spa.db.crud import delete_transaction, get_booking_by_id, get_bookings, \
-    delete_bookings
-# wenn es finance crud gibt brauchen wir das nicht mehr
-from panda_spa.db.models.finance import FinanceEntry
+from panda_spa.db.crud import (
+    delete_transaction,
+    get_booking_by_id,
+    get_bookings,
+    delete_bookings,
+    get_transactions
+)
 from panda_spa.validation import ServiceRegistryMeta
 
 for loader, name_pkg, is_pkg in pkgutil.iter_modules(services.__path__):
@@ -137,24 +145,15 @@ def render_new_income(booking_id):
 @app.route("/finances")
 def render_finances():
     filter_type = request.args.get("type") or "all"
-    # Finance CRUD wäre wahrscheinlich sinnvoller (Filterfunktionen)
+
     with SessionLocal() as db:
-        total_income = db.query(func.sum(FinanceEntry.amount)) \
-                           .filter(FinanceEntry.type == "income") \
-                           .scalar() or 0
+        transactions = get_transactions(db)
 
-        total_expense = db.query(func.sum(FinanceEntry.amount)) \
-                            .filter(FinanceEntry.type == "expense") \
-                            .scalar() or 0
-
+        total_income = sum(t.amount for t in transactions if t.type == "income")
+        total_expense = sum(t.amount for t in transactions if t.type == "expense")
         profit = total_income - total_expense
 
-        query = db.query(FinanceEntry)  # Wir brauchen auch getTransaction, also einzeln!
-
-        if filter_type in ["income", "expense"]:
-            query = query.filter(FinanceEntry.type == filter_type)
-
-        transactions = query.order_by(FinanceEntry.date).all()
+        transactions = get_transactions(db, filter_type)
 
     return render_template(
         "finances.html",
