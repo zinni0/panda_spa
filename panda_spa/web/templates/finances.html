@@ -29,6 +29,68 @@
     <h3>Finanzübersicht</h3>
     <canvas id="financeChart"></canvas>
 </div>
+<p>
+<div class="filter-bar">
+
+    <a href="{{ url_for('finances') }}"
+       class="filter-btn {% if active_filter == 'all' %}active{% endif %}">
+        Alle
+    </a>
+
+    <a href="{{ url_for('finances', type='income') }}"
+       class="filter-btn {% if active_filter == 'income' %}active{% endif %}">
+        Einnahmen
+    </a>
+
+    <a href="{{ url_for('finances', type='expense') }}"
+       class="filter-btn {% if active_filter == 'expense' %}active{% endif %}">
+        Ausgaben
+    </a>
+
+</div>
+<div class="card">
+    <h3>Alle Transaktionen</h3>
+
+    <table>
+        <thead>
+        <tr>
+            <th>Datum</th>
+            <th>Typ</th>
+            <th>Betrag (€)</th>
+            <th>Beschreibung</th>
+            <th>Aktion</th>
+        </tr>
+        </thead>
+
+        <tbody>
+
+        {% for t in transactions %}
+
+        <tr>
+            <td>{{ t.date.strftime("%d.%m.%Y %H:%M") }}</td>
+            <td>
+                {% if t.type == "income" %}
+                    <span class="badge income">Einnahme</span>
+                {% else %}
+                    <span class="badge expense">Ausgabe</span>
+                {% endif %}
+            </td>
+            <td>{{ t.amount }} €</td>
+            <td>{{ t.description }}</td>
+            <td class="action-col">
+                <a href="{{ url_for('delete_transaction', transaction_id=t.id) }}"
+                    class="delete-btn"
+                    onclick="return confirm('Transaktion löschen?')">
+                    Löschen
+                </a>
+            </td>
+        </tr>
+
+        {% endfor %}
+
+        </tbody>
+    </table>
+</div>
 
 <script>
 
@@ -61,8 +123,4 @@ new Chart(ctx, {
 });
 
 </script>
-
-<p>In Arbeit... :) (chartjs evtl. nutzen (recherche), Daten: Einnahmen(werden mit jeder dienstleistung berechnet),
-    Kosten (auch pro Dienstleistung), Gewinn: Einnahmen-Ausgaben)</p>
-<p>Filter nutzen</p>
 {% endblock %}
