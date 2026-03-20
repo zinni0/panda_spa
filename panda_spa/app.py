@@ -3,6 +3,7 @@ import pkgutil
 import re # brauchen wir für Umwandlung service_name in service_tag
 
 from flask import Flask, render_template, request, redirect, url_for
+from sqlalchemy import func
 
 from panda_spa.config import ConfigLoader
 from panda_spa.core import BookingFormData, BookingManager, services
@@ -159,8 +160,24 @@ def new_income(booking_id):
 
 @app.route("/finances")
 def finances():
-    """Finanzseite (noch leer)"""
-    return render_template("finances.html")
+    # Finance CRUD wäre wahrscheinlich sinnvoller
+    with SessionLocal() as db:
+        total_income = db.query(func.sum(FinanceEntry.amount)) \
+                           .filter(FinanceEntry.type == "income") \
+                           .scalar() or 0
+
+        total_expense = db.query(func.sum(FinanceEntry.amount)) \
+                            .filter(FinanceEntry.type == "expense") \
+                            .scalar() or 0
+
+        profit = total_income - total_expense
+
+        return render_template(
+            "finances.html",
+            total_income=round(total_income, 2),
+            total_expense=round(total_expense, 2),
+            profit=round(profit, 2)
+        )
 
 
 @app.route("/new-expense", methods=["GET", "POST"])

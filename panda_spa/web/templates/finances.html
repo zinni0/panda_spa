@@ -4,11 +4,63 @@
 
 <div class="card">
     <h2>Finanzen</h2>
-
     <a href="{{ url_for('new_expense') }}" class="expense-btn">
         Neue Betriebsausgabe
     </a>
+    <p>
 </div>
+<div class="stats-container">
+
+    <div class="stat-card income">
+        <h3>Einnahmen</h3>
+        <p>{{ total_income }} €</p>
+    </div>
+    <div class="stat-card expense">
+        <h3>Ausgaben</h3>
+        <p>{{ total_expense }} €</p>
+    </div>
+    <div class="stat-card profit">
+        <h3>Gewinn</h3>
+        <p>{{ profit }} €</p>
+    </div>
+</div>
+<p>
+<div class="card">
+    <h3>Finanzübersicht</h3>
+    <canvas id="financeChart"></canvas>
+</div>
+
+<script>
+
+const income = {{ total_income }};
+const expense = {{ total_expense }};
+
+const ctx = document.getElementById('financeChart').getContext('2d');
+
+new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: ['Einnahmen', 'Ausgaben'],
+        datasets: [{
+            label: '€ Betrag',
+            data: [income, expense],
+            backgroundColor: [
+            '#23ce6b',  // Einnahmen (grün)
+            '#d7263d'   // Ausgaben (rot)
+            ]
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                display: false
+            }
+        }
+    }
+});
+
+</script>
 
 <p>In Arbeit... :) (chartjs evtl. nutzen (recherche), Daten: Einnahmen(werden mit jeder dienstleistung berechnet),
     Kosten (auch pro Dienstleistung), Gewinn: Einnahmen-Ausgaben)</p>
