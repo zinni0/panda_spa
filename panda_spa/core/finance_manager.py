@@ -5,8 +5,7 @@ from typing import Tuple, Literal
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
-from panda_spa.db.crud import set_booking_paid, get_booking_by_id
-from panda_spa.db.crud.finance import create_transaction
+from panda_spa.db.crud import set_booking_paid, get_booking_by_id, create_transaction
 from panda_spa.schema import TransactionSchema
 
 
@@ -24,11 +23,8 @@ class FinanceManager:
             data: FinanceFormData,
             booking_id: int = None
     ) -> Tuple[int, str | None]:
-        if booking_id:
-            booking = get_booking_by_id(db, booking_id)
-
-            if booking.is_paid:
-                return 409, "Conflict: invoice is already settled and cannot be charged again"
+        if FinanceManager._is_paid(db, booking_id):
+            return 409, "invoice is already settled and cannot be charged again"
 
         try:
             transaction_schema = TransactionSchema(
@@ -37,6 +33,7 @@ class FinanceManager:
                 description=data.description,
                 date=datetime.utcnow()
             )
+
         except ValidationError as exc:
             error_massages = "; ".join([f"{err['loc'][0]}: {err['msg']}" for err in exc.errors()])
             return 400, error_massages
@@ -47,3 +44,11 @@ class FinanceManager:
             set_booking_paid(db, booking_id)
 
         return 200, None
+
+    @staticmethod
+    def _is_paid(db: Session, booking_id: int | None) -> bool:
+        if not booking_id:
+            return False
+
+        booking = get_booking_by_id(db, booking_id)
+        return booking.is_paid

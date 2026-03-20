@@ -24,8 +24,9 @@ class BookingSchema(BaseModel):
     service_name: str = Field(..., description="name of the booked service")
     start_time: datetime = Field(..., description="start time of the booking")
     end_time: datetime = Field(..., description="end time of the booking")
-    is_paid: bool = Field(default=False,
-                          description="True if the booking has been paid, False otherwise")
+    is_paid: bool = Field(
+        default=False, description="True if the booking has been paid, False otherwise"
+    )
 
     @classmethod
     def _get_service_names(cls) -> Set[str]:
