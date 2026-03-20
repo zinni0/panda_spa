@@ -85,11 +85,11 @@ def render_new_booking():
 def render_manage_bookings():
     """Zeigt alle Buchungen sortiert nach Datum und Uhrzeit"""
     with SessionLocal() as db:
-        sorted_bookings = get_bookings(db)
+        ordered_bookings = get_bookings(db)
 
     return render_template(
         "bookings_manage.html",
-        bookings=sorted_bookings
+        bookings=ordered_bookings
     )
 
 
@@ -153,14 +153,14 @@ def render_finances():
         total_expense = sum(t.amount for t in transactions if t.type == "expense")
         profit = total_income - total_expense
 
-        transactions = get_transactions(db, filter_type)
+        ordered_transactions = get_transactions(db, filter_type)
 
     return render_template(
         "finances.html",
         total_income=round(total_income, 2),
         total_expense=round(total_expense, 2),
         profit=round(profit, 2),
-        transactions=transactions,
+        transactions=ordered_transactions,
         active_filter=filter_type
     )
 
