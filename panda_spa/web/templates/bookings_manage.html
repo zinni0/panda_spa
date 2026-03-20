@@ -34,6 +34,11 @@
                    onclick="return confirmDelete()">
                     Löschen
                 </a>
+
+                <a class="billing-btn"
+                    href="{{ url_for('new_income', booking_id=booking.id) }}">
+                    Abrechnen
+                </a>
             </td>
         </tr>
 

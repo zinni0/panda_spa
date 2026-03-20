@@ -3,5 +3,5 @@ spa_services:
     temperature:
       min: 30
       max: 40
-      price: 100
-      cost: 80
+    price: 100
+    cost: 80

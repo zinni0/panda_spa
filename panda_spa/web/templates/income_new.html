@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="card">
+    <h2>Abrechnung erstellen</h2>
+
+    <form method="POST" class="booking-form">
+
+        <label>Kunde</label>
+        <input type="text" value="{{ booking.user.name }}" disabled>
+
+        <label>Dienstleistung</label>
+        <input type="text" value="{{ booking.service_name }}" disabled>
+
+        <label>Festpreis</label>
+        <input type="text" value="{{ base_price }} €" disabled>
+
+        <label>Rabatt (€)</label>
+        <input type="number" step="0.01" name="discount">
+
+        <label>Trinkgeld (€)</label>
+        <input type="number" step="0.01" name="tip">
+
+        <label>Notiz</label>
+        <textarea name="note"></textarea>
+
+        <p>
+        <button type="submit">Abrechnung speichern</button>
+
+    </form>
+</div>
+
+{% endblock %}

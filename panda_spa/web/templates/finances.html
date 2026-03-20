@@ -2,7 +2,13 @@
 
 {% block content %}
 
-<h2>Finanzen</h2>
+<div class="card">
+    <h2>Finanzen</h2>
+
+    <a href="{{ url_for('new_expense') }}" class="expense-btn">
+        Neue Betriebsausgabe
+    </a>
+</div>
 
 <p>In Arbeit... :) (chartjs evtl. nutzen (recherche), Daten: Einnahmen(werden mit jeder dienstleistung berechnet),
     Kosten (auch pro Dienstleistung), Gewinn: Einnahmen-Ausgaben)</p>
