@@ -1,0 +1,61 @@
+import logging
+from typing import Tuple
+
+from sqlalchemy.orm import Session
+
+from panda_spa.db.models import FinanceEntry
+from panda_spa.schema import TransactionSchema
+
+logger = logging.getLogger(__name__)
+
+
+def create_transaction(db: Session, transaction: TransactionSchema) -> FinanceEntry:
+    """
+    Create a new financial transaction in the database
+
+    :param db: SQLAlchemy session object
+    :param transaction: Transaction data to create
+    :return: The newly created FinanceEntry object
+    """
+    db_transaction = FinanceEntry(
+        type=transaction.transaction_type,
+        amount=transaction.amount,
+        description=transaction.description,
+        date=transaction.date
+    )
+
+    db.add(db_transaction)
+    db.commit()
+    db.refresh(db_transaction)
+
+    return db_transaction
+
+
+def get_transactions(db: Session):
+    """
+    Return all transactions ordered by date
+
+    :param db: SQLAlchemy session object
+    :return: List of FinanceEntry objects
+    """
+    return db.query(FinanceEntry).order_by(FinanceEntry.date).all()
+
+
+def delete_transaction(db: Session, transaction_id: int) -> Tuple[str, str]:
+    """
+    Delete a transaction by its ID
+
+    :param db: SQLAlchemy session object
+    :param transaction_id: ID of the transaction to delete
+    :return: Tuple containing status ('success' or 'error') and a message
+    """
+    transaction = db.query(FinanceEntry).get(transaction_id)
+
+    if transaction:
+        db.delete(transaction)
+        db.commit()
+        logger.info("Transaction %s deleted", transaction_id)
+        return "success", f"Transaction {transaction_id} deleted"
+
+    logger.warning("Transaction %s not found", transaction_id)
+    return "error", "Transaction not found"
