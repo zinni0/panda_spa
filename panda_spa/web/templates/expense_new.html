@@ -5,6 +5,10 @@
 <div class="card">
     <h2>Neue Betriebsausgabe</h2>
 
+    {% if error %}
+    <p class="error">{{ error }}</p>
+    {% endif %}
+
     <form method="POST" class="booking-form">
 
         <label>Betrag (€)</label>

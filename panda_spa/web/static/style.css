@@ -184,6 +184,13 @@ tbody tr:hover {
     background-color: var(--color-button-hover);
 }
 
+.billing-btn.disabled {
+    background-color: #cbd5e0;
+    color: #718096;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
 .expense-btn {
     display: inline-block;
     background-color: var(--color-blue);

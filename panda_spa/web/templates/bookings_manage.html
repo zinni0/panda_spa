@@ -35,10 +35,16 @@
                     Löschen
                 </a>
 
-                <a class="billing-btn"
-                    href="{{ url_for('render_new_income', booking_id=booking.id) }}">
-                    Abrechnen
-                </a>
+                {% if booking.is_paid %}
+                    <span class="billing-btn disabled">
+                        Bezahlt
+                    </span>
+                {% else %}
+                    <a class="billing-btn"
+                        href="{{ url_for('render_new_income', booking_id=booking.id) }}">
+                        Abrechnen
+                    </a>
+                {% endif %}
             </td>
         </tr>
 

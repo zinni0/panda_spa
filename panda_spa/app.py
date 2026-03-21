@@ -121,7 +121,8 @@ def render_new_income(booking_id):
             return render_template(
                 "income_new.html",
                 booking=booking,
-                base_price=base_price
+                base_price=base_price,
+                error=None
             )
 
         discount = float(request.form.get("discount") or 0)
@@ -136,8 +137,12 @@ def render_new_income(booking_id):
         status_code, error = FinanceManager.create_transaction(db, form_data, booking_id)
 
         if status_code != 200:
-            # Konrad, hier musst du nochmal ran, hier fehlt die Anzeige von Errors
-            raise RuntimeError(error)
+            return render_template(
+                "income_new.html",
+                booking=booking,
+                base_price=base_price,
+                error=error
+            )
 
         return redirect(url_for("render_manage_bookings"))
 
@@ -181,7 +186,10 @@ def render_new_expense():
     """
 
     if not request.method == "POST":
-        return render_template("expense_new.html")
+        return render_template(
+            "expense_new.html",
+            error=None
+        )
 
     with SessionLocal() as db:
         form_data = FinanceFormData(
@@ -193,8 +201,10 @@ def render_new_expense():
         status_code, error = FinanceManager.create_transaction(db, form_data)
 
         if status_code != 200:
-            # Konrad, hier musst du nochmal ran, hier fehlt die Anzeige von Errors
-            raise RuntimeError(error)
+            return render_template(
+                "expense_new.html",
+                error=error
+            )
 
         return redirect(url_for("render_finances"))
 
