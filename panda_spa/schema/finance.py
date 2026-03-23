@@ -13,6 +13,7 @@ class TransactionSchema(BaseModel):
     :var description: Optional text describing the transaction;
     defaults to an empty string
     :var date: The datetime of the transaction; defaults to the current UTC time
+    :var booking_id: The ID of the booking.
     """
     transaction_type: Literal["income", "expense"] = Field(
         ..., description="Type of transaction: 'income' or 'expense'"

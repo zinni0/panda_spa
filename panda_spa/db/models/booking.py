@@ -14,6 +14,7 @@ class Booking(Base):
     :var end_time: End datetime of the booking
     :var is_paid: Boolean indicating if the booking has been paid
     True = paid, False = unpaid/open
+    :var finance_entry: optional transaction of the booking
     """
     __tablename__ = "bookings"
 

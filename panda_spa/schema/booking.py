@@ -19,6 +19,7 @@ class BookingSchema(BaseModel):
     :var start_time: Start time of the booking.
     :var end_time: End time of the booking, must be after start_time.
     :var is_paid: True if the booking has been paid, False if payment is still pending.
+    :var transaction_id: Optional ID if booking has transaction.
     """
     user_id: int = Field(..., gt=0, description="id of the user")
     service_name: str = Field(..., description="name of the booked service")

@@ -14,6 +14,7 @@ class FinanceEntry(Base):
     :var amount: Transaction amount
     :var description: Description of the transaction
     :var date: Date and time of the transaction
+    :var booking: Booking of the transaction
     """
     __tablename__ = "finance"
 
