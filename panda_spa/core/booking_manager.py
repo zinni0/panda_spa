@@ -2,14 +2,12 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Tuple
 
-from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
-from panda_spa.core.crud.booking import create_booking
-from panda_spa.core.crud.user import create_user
-from panda_spa.models.booking import Booking
-from panda_spa.schema.booking import BookingSchema
-from panda_spa.schema.user import UserSchema
+from panda_spa.core.spa_service_factory import SpaServiceFactory
+from panda_spa.db.crud import create_booking, create_user
+from panda_spa.db.models import Booking
+from panda_spa.schema import BookingSchema, UserSchema
 
 
 @dataclass
@@ -26,16 +24,20 @@ class BookingManager:
     def create_booking(db: Session, data: BookingFormData) -> Tuple[int, str | None]:
         error = None
 
+        service = SpaServiceFactory.create(data.service)
+
         booking_datetime = datetime.strptime(
             f"{data.date} {data.time}", "%Y-%m-%d %H:%M"
         )
-        booking_endtime = booking_datetime + timedelta(minutes=30)
+        booking_endtime = booking_datetime + timedelta(
+            minutes=service.to_dict().get("duration")
+        )
 
         if booking_datetime < datetime.now():
             error = "Buchung darf nicht in der Vergangenheit liegen"
             return 422, error
 
-        overlapping = BookingManager.__find_bookings(
+        overlapping = BookingManager._find_bookings(
             db, booking_datetime, booking_endtime
         )
 
@@ -61,7 +63,7 @@ class BookingManager:
         return 200, error
 
     @staticmethod
-    def __find_bookings(db: Session, start_time: datetime, end_time: datetime):
+    def _find_bookings(db: Session, start_time: datetime, end_time: datetime):
         return db.query(Booking).filter(
-            and_(Booking.start_time < start_time, Booking.end_time > end_time)
+            Booking.start_time < end_time, Booking.end_time > start_time
         ).first()

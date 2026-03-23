@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Panda Spa</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
@@ -12,13 +13,13 @@
     <h1>Panda Thermal Spa</h1>
 
     <nav>
-        <a href="{{ url_for('new_booking') }}">Neue Buchung</a>
-        <a href="{{ url_for('manage_bookings') }}">Buchungen verwalten</a>
-        <a href="{{ url_for('finances') }}">Finanzen</a>
+        <a href="{{ url_for('render_new_booking') }}">Neue Buchung</a>
+        <a href="{{ url_for('render_manage_bookings') }}">Buchungen verwalten</a>
+        <a href="{{ url_for('render_finances') }}">Finanzen</a>
     </nav>
 </header>
 
-<main>
+<main class="container">
     {% block content %}
     {% endblock %}
 </main>

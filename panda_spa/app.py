@@ -3,10 +3,23 @@ import pkgutil
 
 from flask import Flask, render_template, request, redirect, url_for
 
-from panda_spa import models
-from panda_spa.core import BookingFormData, BookingManager, services, ConfigLoader
-from panda_spa.core.crud.booking import get_bookings, delete_bookings
-from panda_spa.core.database import SessionLocal, Base, engine
+from panda_spa.config import ConfigLoader
+from panda_spa.core import (
+    BookingFormData,
+    BookingManager,
+    services,
+    SpaServiceFactory,
+    FinanceFormData,
+    FinanceManager
+)
+from panda_spa.db import SessionLocal, Base, engine, models
+from panda_spa.db.crud import (
+    delete_transaction,
+    get_booking_by_id,
+    get_bookings,
+    delete_bookings,
+    get_transactions
+)
 from panda_spa.validation import ServiceRegistryMeta
 
 for loader, name_pkg, is_pkg in pkgutil.iter_modules(services.__path__):
@@ -15,13 +28,8 @@ for loader, name_pkg, is_pkg in pkgutil.iter_modules(services.__path__):
 for loader, name_pkg, is_pkg in pkgutil.iter_modules(models.__path__):
     importlib.import_module(f"{models.__name__}.{name_pkg}")
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder="web/templates", static_folder="web/static")
 
-# -----------------------------
-# MOCK DATA (später DB ersetzen)
-# -----------------------------
-
-# Tierarten (werden später aus DB geladen)
 species_list = [
     "Panda",
     "Fuchs",
@@ -30,88 +38,175 @@ species_list = [
     "Waschbär"
 ]
 
-# Buchungen (temporär)
-bookings = []
-
-"""
-Ersetzen z.B. mit:
-get_species()
-get_services()
-get_bookings()
-create_booking()
-delete_booking()
-"""
-
 
 # -----------------------------
 # ROUTEN
 # -----------------------------
 
 @app.route("/")
-def home():
+def render_home():
     """Startseite -> Neue Buchung"""
-    return redirect(url_for("new_booking"))
+    return redirect(url_for("render_new_booking"))
 
 
 @app.route("/new-booking", methods=["GET", "POST"])
-def new_booking():
-    error = None
+def render_new_booking():
+    if not request.method == "POST":
+        return render_template(
+            "booking_new.html",
+            species_list=species_list,
+            services=list(ServiceRegistryMeta.get_registry().keys()),
+            error=None
+        )
 
-    if request.method == "POST":
-        with SessionLocal() as db:
-            form_data = BookingFormData(
-                name=request.form.get("name"),
-                species=request.form.get("species"),
-                date=request.form.get("date"),
-                time=request.form.get("time"),
-                service=request.form.get("service")
+    with SessionLocal() as db:
+        form_data = BookingFormData(
+            name=request.form.get("name"),
+            species=request.form.get("species"),
+            date=request.form.get("date"),
+            time=request.form.get("time"),
+            service=request.form.get("service")
+        )
+
+        status_code, error = BookingManager.create_booking(db, form_data)
+
+        if status_code != 200:
+            return render_template(
+                "booking_new.html",
+                species_list=species_list,
+                services=list(ServiceRegistryMeta.get_registry().keys()),
+                error=error
             )
 
-            status_code, error = BookingManager.create_booking(db, form_data)
-
-            if status_code != 200:
-                return render_template(
-                    "booking_new.html",
-                    species_list=species_list,
-                    services=list(ServiceRegistryMeta.registry.keys()),
-                    error=error
-                )
-
-            return redirect(url_for("manage_bookings"))
-
-    return render_template(
-        "booking_new.html",
-        species_list=species_list,
-        services=list(ServiceRegistryMeta.registry.keys()),
-        error=error
-    )
+        return redirect(url_for("render_manage_bookings"))
 
 
 @app.route("/manage-bookings")
-def manage_bookings():
+def render_manage_bookings():
     """Zeigt alle Buchungen sortiert nach Datum und Uhrzeit"""
     with SessionLocal() as db:
-        sorted_bookings = get_bookings(db)
-        return render_template(
-            "bookings_manage.html",
-            bookings=sorted_bookings
-        )
+        ordered_bookings = get_bookings(db)
+
+    return render_template(
+        "bookings_manage.html",
+        bookings=ordered_bookings
+    )
 
 
 @app.route("/delete-booking/<int:booking_id>")
-def delete_booking(booking_id):
+def render_delete_booking(booking_id):
     """Löscht eine Buchung"""
     with SessionLocal() as db:
         status, msg = delete_bookings(db, booking_id)
         print(f"{status}: {msg}")
 
-    return redirect(url_for("manage_bookings"))
+    return redirect(url_for("render_manage_bookings"))
+
+
+@app.route("/new-income/<int:booking_id>", methods=["GET", "POST"])
+def render_new_income(booking_id):
+    """
+    Erstellt eine Abrechnung für eine Buchung
+    """
+
+    with SessionLocal() as db:
+        booking = get_booking_by_id(db, booking_id)
+        if not booking:
+            return "Booking not found", 404
+
+        service = SpaServiceFactory.create(booking.service_name)
+        base_price = service.to_dict().get("price")
+
+        if not request.method == "POST":
+            return render_template(
+                "income_new.html",
+                booking=booking,
+                base_price=base_price,
+                error=None
+            )
+
+        discount = float(request.form.get("discount") or 0)
+        tip = float(request.form.get("tip") or 0)
+
+        form_data = FinanceFormData(
+            type="income",
+            amount=(base_price + tip) - discount,
+            description=(request.form.get("note") or "No description")
+        )
+
+        status_code, error = FinanceManager.create_transaction(db, form_data, booking_id)
+
+        if status_code != 200:
+            return render_template(
+                "income_new.html",
+                booking=booking,
+                base_price=base_price,
+                error=error
+            )
+
+        return redirect(url_for("render_manage_bookings"))
 
 
 @app.route("/finances")
-def finances():
-    """Finanzseite (noch leer)"""
-    return render_template("finances.html")
+def render_finances():
+    filter_type = request.args.get("type") or "all"
+
+    with SessionLocal() as db:
+        transactions = get_transactions(db)
+
+        total_income = sum(t.amount for t in transactions if t.type == "income")
+        total_expense = sum(t.amount for t in transactions if t.type == "expense")
+        profit = total_income - total_expense
+
+        ordered_transactions = get_transactions(db, filter_type)
+
+    return render_template(
+        "finances.html",
+        total_income=round(total_income, 2),
+        total_expense=round(total_expense, 2),
+        profit=round(profit, 2),
+        transactions=ordered_transactions,
+        active_filter=filter_type
+    )
+
+
+@app.route("/delete-transaction/<int:transaction_id>")
+def render_delete_transaction(transaction_id):
+    with SessionLocal() as db:
+        status, msg = delete_transaction(db, transaction_id)
+        print(f"{status}: {msg}")
+
+    return redirect(url_for("render_finances"))
+
+
+@app.route("/new-expense", methods=["GET", "POST"])
+def render_new_expense():
+    """
+    Neue Betriebsausgabe erstellen
+    """
+
+    if not request.method == "POST":
+        return render_template(
+            "expense_new.html",
+            error=None
+        )
+
+    with SessionLocal() as db:
+        form_data = FinanceFormData(
+            type="expense",
+            amount=float(request.form.get("amount") or 0),
+            description=(request.form.get("note") or "No description")
+        )
+
+        status_code, error = FinanceManager.create_transaction(db, form_data)
+
+        if status_code != 200:
+            return render_template(
+                "expense_new.html",
+                error=error
+            )
+
+        return redirect(url_for("render_finances"))
 
 
 if __name__ == "__main__":

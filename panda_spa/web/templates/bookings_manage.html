@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card">
+    <h2>Manage Bookings</h2>
+
+    <table>
+
+        <thead>
+        <tr>
+            <th>Datum</th>
+            <th>Uhrzeit</th>
+            <th>Name</th>
+            <th>Tierart</th>
+            <th>Dienstleistung</th>
+            <th class="action-col">Aktion</th>
+        </tr>
+        </thead>
+
+        <tbody>
+
+        {% for booking in bookings %}
+
+        <tr>
+            <td>{{ booking.start_time.strftime("%d.%m.%Y") }}</td>
+            <td>{{ booking.start_time.strftime("%H:%M") }} - {{ booking.end_time.strftime("%H:%M") }}</td>
+            <td>{{ booking.user.name }}</td>
+            <td>{{ booking.user.species }}</td>
+            <td>{{ booking.service_name }}</td>
+
+            <td class="action-col">
+                <a class="delete-btn"
+                   href="{{ url_for('render_delete_booking', booking_id=booking.id) }}"
+                   onclick="return confirm('Soll diese Buchung endgültig gelöscht werden?')">
+                    Löschen
+                </a>
+
+                {% if booking.is_paid %}
+                    <span class="billing-btn disabled">
+                        Bezahlt
+                    </span>
+                {% else %}
+                    <a class="billing-btn"
+                        href="{{ url_for('render_new_income', booking_id=booking.id) }}">
+                        Abrechnen
+                    </a>
+                {% endif %}
+            </td>
+        </tr>
+
+        {% endfor %}
+
+        </tbody>
+
+    </table>
+</div>
+{% endblock %}

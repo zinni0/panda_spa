@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="card">
+    <h2>Finanzen</h2>
+    <a href="{{ url_for('render_new_expense') }}" class="expense-btn">
+        Neue Betriebsausgabe
+    </a>
+    <p>
+</div>
+<div class="stats-container">
+
+    <div class="stat-card income">
+        <h3>Einnahmen</h3>
+        <p>{{ total_income }} €</p>
+    </div>
+    <div class="stat-card expense">
+        <h3>Ausgaben</h3>
+        <p>{{ total_expense }} €</p>
+    </div>
+    <div class="stat-card profit">
+        <h3>Gewinn</h3>
+        <p>{{ profit }} €</p>
+    </div>
+</div>
+<p>
+<div class="card">
+    <h3>Finanzübersicht</h3>
+    <canvas id="financeChart"></canvas>
+</div>
+<p>
+<div class="filter-bar">
+
+    <a href="{{ url_for('render_finances') }}"
+       class="filter-btn {% if active_filter == 'all' %}active{% endif %}">
+        Alle
+    </a>
+
+    <a href="{{ url_for('render_finances', type='income') }}"
+       class="filter-btn {% if active_filter == 'income' %}active{% endif %}">
+        Einnahmen
+    </a>
+
+    <a href="{{ url_for('render_finances', type='expense') }}"
+       class="filter-btn {% if active_filter == 'expense' %}active{% endif %}">
+        Ausgaben
+    </a>
+
+</div>
+<div class="card">
+    <h3>Alle Transaktionen</h3>
+
+    <table>
+        <thead>
+        <tr>
+            <th>Datum</th>
+            <th>Typ</th>
+            <th>Betrag (€)</th>
+            <th>Beschreibung</th>
+            <th>Aktion</th>
+        </tr>
+        </thead>
+
+        <tbody>
+
+        {% for t in transactions %}
+
+        <tr>
+            <td>{{ t.date.strftime("%d.%m.%Y %H:%M") }}</td>
+            <td>
+                {% if t.type == "income" %}
+                    <span class="badge income">Einnahme</span>
+                {% else %}
+                    <span class="badge expense">Ausgabe</span>
+                {% endif %}
+            </td>
+            <td>{{ t.amount }} €</td>
+            <td>{{ t.description }}</td>
+            <td class="action-col">
+                <a href="{{ url_for('render_delete_transaction', transaction_id=t.id) }}"
+                    class="delete-btn"
+                    onclick="return confirm('Transaktion löschen?')">
+                    Löschen
+                </a>
+            </td>
+        </tr>
+
+        {% endfor %}
+
+        </tbody>
+    </table>
+</div>
+
+<script>
+
+const income = {{ total_income }};
+const expense = {{ total_expense }};
+
+const ctx = document.getElementById('financeChart').getContext('2d');
+
+new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: ['Einnahmen', 'Ausgaben'],
+        datasets: [{
+            label: '€ Betrag',
+            data: [income, expense],
+            backgroundColor: [
+            '#23ce6b',  // Einnahmen (grün)
+            '#d7263d'   // Ausgaben (rot)
+            ]
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                display: false
+            }
+        }
+    }
+});
+
+</script>
+{% endblock %}

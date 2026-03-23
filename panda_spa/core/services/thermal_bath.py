@@ -1,22 +1,22 @@
 from typing import Dict, Any
 
 from panda_spa.core.services.spa_service import SpaService
-from panda_spa.validation.descriptors import RangeValueDescriptor
+from panda_spa.validation import RangeValueDescriptor
 
 
 class ThermalBath(SpaService):
-    temperature = RangeValueDescriptor(
-        config_path="spa_service.thermal_bath.temperature"
+    _temperature = RangeValueDescriptor(
+        config_path="spa_services.thermal_bath.temperature"
     )
 
     def __init__(self, price: float, duration: int, temperature: int):
         super().__init__(price=price, duration=duration)
-        self.temperature = temperature
+        self._temperature = temperature
 
     def get_description(self) -> str:
-        return f"Thermal bath at {self.temperature}°C"
+        return f"Thermal bath at {self._temperature}°C"
 
     def to_dict(self) -> Dict[str, Any]:
         base = super().to_dict()
-        base["temperature"] = self.temperature
+        base["temperature"] = self._temperature
         return base
