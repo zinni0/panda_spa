@@ -65,5 +65,5 @@ class BookingManager:
     @staticmethod
     def _find_bookings(db: Session, start_time: datetime, end_time: datetime):
         return db.query(Booking).filter(
-            Booking.start_time < start_time, Booking.end_time > end_time
+            Booking.start_time < end_time, Booking.end_time > start_time
         ).first()
