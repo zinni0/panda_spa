@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime
-from typing import Set
+from typing import Set, Optional
 
 from pydantic import BaseModel, Field, field_validator
 from pydantic_core.core_schema import ValidationInfo
@@ -27,6 +27,8 @@ class BookingSchema(BaseModel):
     is_paid: bool = Field(
         default=False, description="True if the booking has been paid, False otherwise"
     )
+
+    transaction_id: Optional[int] = None
 
     @classmethod
     def _get_service_names(cls) -> Set[str]:

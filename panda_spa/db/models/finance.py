@@ -1,6 +1,7 @@
 from datetime import datetime
 
-from sqlalchemy import Column, Integer, String, Float, DateTime
+from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey
+from sqlalchemy.orm import relationship
 
 from panda_spa.db.database import Base
 
@@ -21,3 +22,9 @@ class FinanceEntry(Base):
     amount = Column(Float, nullable=False)
     description = Column(String, nullable=False)
     date = Column(DateTime, default=datetime.utcnow)
+
+    booking_id = Column(
+        Integer, ForeignKey("bookings.id", ondelete="CASCADE"), unique=True
+    )
+
+    booking = relationship("Booking", back_populates="finance_entry")

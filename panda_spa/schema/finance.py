@@ -25,5 +25,9 @@ class TransactionSchema(BaseModel):
         default_factory=datetime.utcnow, description="Transaction date"
     )
 
+    booking_id: Optional[int] = Field(
+        None, description="ID of the booking"
+    )
+
     class Config:
         from_attributes = True

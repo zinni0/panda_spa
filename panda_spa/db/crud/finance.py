@@ -3,6 +3,7 @@ from typing import Tuple
 
 from sqlalchemy.orm import Session
 
+from panda_spa.db.crud import set_booking_paid
 from panda_spa.db.models import FinanceEntry
 from panda_spa.schema import TransactionSchema
 
@@ -57,11 +58,17 @@ def delete_transaction(db: Session, transaction_id: int) -> Tuple[str, str]:
     """
     transaction = db.query(FinanceEntry).get(transaction_id)
 
-    if transaction:
-        db.delete(transaction)
-        db.commit()
-        logger.info("Transaction %s deleted", transaction_id)
-        return "success", f"Transaction {transaction_id} deleted"
+    if not transaction:
+        logger.warning("Transaction %s not found", transaction_id)
+        return "error", "Transaction not found"
 
-    logger.warning("Transaction %s not found", transaction_id)
-    return "error", "Transaction not found"
+    booking = transaction.booking
+
+    db.delete(transaction)
+
+    if booking:
+        set_booking_paid(db, booking.id, False)
+
+    db.commit()
+    logger.info("Transaction %s deleted", transaction_id)
+    return "success", f"Transaction {transaction_id} deleted"

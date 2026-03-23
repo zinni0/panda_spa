@@ -25,3 +25,10 @@ class Booking(Base):
     is_paid = Column(Boolean, default=False, nullable=False)
 
     user = relationship("User", back_populates="bookings")
+
+    finance_entry = relationship(
+        "FinanceEntry",
+        back_populates="booking",
+        uselist=False,
+        cascade="all, delete-orphan"
+    )

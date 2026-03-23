@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Tuple
 
-from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
 from panda_spa.core.spa_service_factory import SpaServiceFactory
@@ -66,5 +65,5 @@ class BookingManager:
     @staticmethod
     def __find_bookings(db: Session, start_time: datetime, end_time: datetime):
         return db.query(Booking).filter(
-            and_(Booking.start_time < start_time, Booking.end_time > end_time)
+            Booking.start_time < start_time, Booking.end_time > end_time
         ).first()

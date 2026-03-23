@@ -31,7 +31,8 @@ class FinanceManager:
                 transaction_type=data.type,
                 amount=data.amount,
                 description=data.description,
-                date=datetime.utcnow()
+                date=datetime.utcnow(),
+                booking_id=booking_id
             )
 
         except ValidationError as exc:
