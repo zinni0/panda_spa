@@ -22,7 +22,8 @@ def create_transaction(db: Session, transaction: TransactionSchema) -> FinanceEn
         type=transaction.transaction_type,
         amount=transaction.amount,
         description=transaction.description,
-        date=transaction.date
+        date=transaction.date,
+        booking_id=transaction.booking_id
     )
 
     db.add(db_transaction)

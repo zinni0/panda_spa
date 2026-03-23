@@ -37,7 +37,7 @@ class BookingManager:
             error = "Buchung darf nicht in der Vergangenheit liegen"
             return 422, error
 
-        overlapping = BookingManager.__find_bookings(
+        overlapping = BookingManager._find_bookings(
             db, booking_datetime, booking_endtime
         )
 
@@ -63,7 +63,7 @@ class BookingManager:
         return 200, error
 
     @staticmethod
-    def __find_bookings(db: Session, start_time: datetime, end_time: datetime):
+    def _find_bookings(db: Session, start_time: datetime, end_time: datetime):
         return db.query(Booking).filter(
             Booking.start_time < start_time, Booking.end_time > end_time
         ).first()
