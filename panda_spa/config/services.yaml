@@ -3,7 +3,26 @@ spa_services:
     temperature:
       min: 30
       max: 40
-    price: 100
+    price: 56.99
     duration: 45
     extra:
       temperature: 38
+  sauna:
+    temperature:
+      min: 60
+      max: 120
+    price: 68.99
+    duration: 90
+    extra:
+      temperature: 88
+  massage:
+    price: 24.93
+    duration: 20
+  aroma_therapy:
+    intensity:
+      min: 1
+      max: 5
+    price: 46.23
+    duration: 40
+    extra:
+      intensity: 3

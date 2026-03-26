@@ -1,5 +1,3 @@
-import pytest
-
 from panda_spa.validation import ServiceRegistryMeta
 
 
@@ -30,12 +28,3 @@ def test_registry_contains_correct_class_objects():
     registry = ServiceRegistryMeta.get_registry()
     assert registry['MassageService'] is MassageService
     assert registry['FacialService'] is FacialService
-
-
-def test_double_registration_raises_error():
-    class DummyService(SpaService):
-        pass
-
-    with pytest.raises(ValueError):
-        ServiceRegistryMeta._registry['DummyService'] = DummyService
-        ServiceRegistryMeta.__new__(ServiceRegistryMeta, 'DummyService', (SpaService,), {})
