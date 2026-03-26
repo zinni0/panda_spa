@@ -13,6 +13,7 @@ class User(Base):
     :var favorite_service_name: Optional preferred spa service
     """
     __tablename__ = "users"
+    __table_args__ = {"extend_existing": True}
 
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)

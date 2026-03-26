@@ -17,6 +17,7 @@ class FinanceEntry(Base):
     :var booking: Booking of the transaction
     """
     __tablename__ = "finance"
+    __table_args__ = {"extend_existing": True}
 
     id = Column(Integer, primary_key=True)
     type = Column(String, nullable=False)

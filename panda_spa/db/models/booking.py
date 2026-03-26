@@ -17,6 +17,7 @@ class Booking(Base):
     :var finance_entry: optional transaction of the booking
     """
     __tablename__ = "bookings"
+    __table_args__ = {"extend_existing": True}
 
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)

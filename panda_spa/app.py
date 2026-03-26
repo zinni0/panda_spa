@@ -1,10 +1,15 @@
 import importlib
+import os
 import pkgutil
+import sys
 
 from flask import Flask, render_template, request, redirect, url_for
 
-from panda_spa.config import ConfigLoader
-from panda_spa.core import (
+repo_root = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, repo_root)
+
+from config import ConfigLoader
+from core import (
     BookingFormData,
     BookingManager,
     services,
@@ -12,15 +17,15 @@ from panda_spa.core import (
     FinanceFormData,
     FinanceManager
 )
-from panda_spa.db import SessionLocal, Base, engine, models
-from panda_spa.db.crud import (
+from db import SessionLocal, Base, engine, models
+from db.crud import (
     delete_transaction,
     get_booking_by_id,
     get_bookings,
     delete_bookings,
     get_transactions
 )
-from panda_spa.validation import ServiceRegistryMeta
+from validation import ServiceRegistryMeta
 
 for loader, name_pkg, is_pkg in pkgutil.iter_modules(services.__path__):
     importlib.import_module(f"{services.__name__}.{name_pkg}")
@@ -28,7 +33,11 @@ for loader, name_pkg, is_pkg in pkgutil.iter_modules(services.__path__):
 for loader, name_pkg, is_pkg in pkgutil.iter_modules(models.__path__):
     importlib.import_module(f"{models.__name__}.{name_pkg}")
 
-app = Flask(__name__, template_folder="web/templates", static_folder="web/static")
+app = Flask(
+    __name__,
+    template_folder=os.path.join(repo_root, "web", "templates"),
+    static_folder=os.path.join(repo_root, "web", "static")
+)
 
 species_list = [
     "Panda",

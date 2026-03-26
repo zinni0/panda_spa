@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from panda_spa.core.spa_service_factory import SpaServiceFactory
 from panda_spa.db.crud import create_booking, create_user
-from panda_spa.db.models import Booking
+from panda_spa.db.models.booking import Booking
 from panda_spa.schema import BookingSchema, UserSchema
 
 
