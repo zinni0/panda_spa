@@ -5,9 +5,9 @@ from validation import RangeValueDescriptor
 from .spa_service import SpaService
 
 
-class ThermalBath(SpaService):
+class Sauna(SpaService):
     _temperature = RangeValueDescriptor(
-        config_path="spa_services.thermal_bath.temperature"
+        config_path="spa_services.sauna.temperature"
     )
 
     def __init__(self, price: float, duration: int, temperature: int):
@@ -15,7 +15,7 @@ class ThermalBath(SpaService):
         self._temperature = temperature
 
     def get_description(self) -> str:
-        return f"Thermal bath at {self._temperature}°C"
+        return f"Sauna at {self._temperature}°C"
 
     def to_dict(self) -> Dict[str, Any]:
         base = super().to_dict()
