@@ -5,8 +5,8 @@ from typing import Tuple, Literal
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
-from panda_spa.db.crud import set_booking_paid, get_booking_by_id, create_transaction
-from panda_spa.schema import TransactionSchema
+from db.crud import set_booking_paid, get_booking_by_id, create_transaction
+from schema import TransactionSchema
 
 
 @dataclass

@@ -17,11 +17,10 @@ class ServiceRegistryMeta(ABCMeta):
         """Register all classes except the base 'SpaService'"""
         cls_obj = super().__new__(mcs, name, bases, dct)
         if name != "SpaService":
-            if name in ServiceRegistryMeta._registry:
-                raise ValueError(f"Class {name} is already registered")
+            if name not in ServiceRegistryMeta._registry:
+                logger.debug("Registering class %s", name)
+                ServiceRegistryMeta._registry[name] = cls_obj
 
-            logger.debug("Registering class %s", name)
-            ServiceRegistryMeta._registry[name] = cls_obj
         return cls_obj
 
     @classmethod

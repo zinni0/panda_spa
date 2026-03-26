@@ -1,8 +1,8 @@
 import re
 
-from panda_spa.config import ConfigLoader
-from panda_spa.core.services import SpaService
-from panda_spa.validation import ServiceRegistryMeta
+from .services.spa_service import SpaService
+from config import ConfigLoader
+from validation import ServiceRegistryMeta
 
 
 class SpaServiceFactory:

@@ -10,14 +10,22 @@ logger = logging.getLogger(__name__)
 
 class ConfigLoader:
     _config: dict[str, Any] = {}
+    _repo_root: Path = Path(__file__).parent.parent
 
     @classmethod
-    def load(cls, path: str = "config/services.yaml") -> None:
+    def load(cls, path: str = None) -> None:
         """
         Load configuration from a YAML file
 
         :param path: Path to the YAML config file
         """
+        if path is None:
+            path = cls._repo_root / "config" / "services.yaml"
+        else:
+            path = Path(path)
+            if not path.is_absolute():
+                path = cls._repo_root / path
+
         try:
             with open(Path(path), "r", encoding="utf-8") as file:
                 cls._config = yaml.safe_load(file) or {}

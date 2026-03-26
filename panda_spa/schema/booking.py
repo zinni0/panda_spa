@@ -5,7 +5,7 @@ from typing import Set, Optional
 from pydantic import BaseModel, Field, field_validator
 from pydantic_core.core_schema import ValidationInfo
 
-from panda_spa.validation import ServiceRegistryMeta
+from validation import ServiceRegistryMeta
 
 logger = logging.getLogger(__name__)
 

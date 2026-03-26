@@ -19,6 +19,8 @@ jobs:
         python -m pip install --upgrade pip
         pip install -e .
         pip install -r requirements.txt
+    - name: Set PYTHONPATH
+      run: echo "PYTHONPATH=$(pwd)/panda_spa" >> $GITHUB_ENV
     - name: Run pytest
       run: |
         pytest --maxfail=5 --disable-warnings -v

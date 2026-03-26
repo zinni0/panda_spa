@@ -1,8 +1,7 @@
 from sqlalchemy import Column, Integer, ForeignKey, String, DateTime, Boolean
 from sqlalchemy.orm import relationship
 
-from panda_spa.db.database import Base
-
+from .. import Base
 
 class Booking(Base):
     """

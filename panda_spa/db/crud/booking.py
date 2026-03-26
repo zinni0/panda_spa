@@ -3,8 +3,8 @@ from typing import Tuple
 
 from sqlalchemy.orm import Session, joinedload
 
-from panda_spa.db.models import Booking
-from panda_spa.schema import BookingSchema
+from ..models.booking import Booking
+from schema import BookingSchema
 
 logger = logging.getLogger(__name__)
 
