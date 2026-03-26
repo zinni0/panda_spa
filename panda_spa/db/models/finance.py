@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 
-from panda_spa.db.database import Base
+from .. import Base
 
 
 class FinanceEntry(Base):
@@ -17,7 +17,6 @@ class FinanceEntry(Base):
     :var booking: Booking of the transaction
     """
     __tablename__ = "finance"
-    __table_args__ = {"extend_existing": True}
 
     id = Column(Integer, primary_key=True)
     type = Column(String, nullable=False)

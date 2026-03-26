@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
-from panda_spa.validation.metaclasses import ServiceRegistryMeta
+from validation.metaclasses import ServiceRegistryMeta
 
 
 class SpaService(ABC, metaclass=ServiceRegistryMeta):

@@ -3,9 +3,9 @@ from typing import Tuple
 
 from sqlalchemy.orm import Session
 
-from panda_spa.db.crud import set_booking_paid
-from panda_spa.db.models.finance import FinanceEntry
-from panda_spa.schema import TransactionSchema
+from . import set_booking_paid
+from ..models.finance import FinanceEntry
+from schema import TransactionSchema
 
 logger = logging.getLogger(__name__)
 

@@ -2,7 +2,7 @@ import logging
 from numbers import Real
 from typing import Optional, Type
 
-from panda_spa.config import ConfigLoader
+from config import ConfigLoader
 
 logger = logging.getLogger(__name__)
 

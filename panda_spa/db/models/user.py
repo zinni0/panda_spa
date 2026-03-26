@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
 
-from panda_spa.db.database import Base
+from .. import Base
 
 
 class User(Base):
@@ -13,7 +13,6 @@ class User(Base):
     :var favorite_service_name: Optional preferred spa service
     """
     __tablename__ = "users"
-    __table_args__ = {"extend_existing": True}
 
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)

@@ -1,7 +1,7 @@
 from typing import Dict, Any
 
-from panda_spa.core.services.spa_service import SpaService
-from panda_spa.validation import RangeValueDescriptor
+from .spa_service import SpaService
+from validation import RangeValueDescriptor
 
 
 class ThermalBath(SpaService):

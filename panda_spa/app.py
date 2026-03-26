@@ -12,11 +12,11 @@ from config import ConfigLoader
 from core import (
     BookingFormData,
     BookingManager,
-    services,
     SpaServiceFactory,
     FinanceFormData,
     FinanceManager
 )
+import core.services as services
 from db import SessionLocal, Base, engine, models
 from db.crud import (
     delete_transaction,
@@ -29,6 +29,7 @@ from validation import ServiceRegistryMeta
 
 for loader, name_pkg, is_pkg in pkgutil.iter_modules(services.__path__):
     importlib.import_module(f"{services.__name__}.{name_pkg}")
+
 
 for loader, name_pkg, is_pkg in pkgutil.iter_modules(models.__path__):
     importlib.import_module(f"{models.__name__}.{name_pkg}")
@@ -224,4 +225,4 @@ if __name__ == "__main__":
 
     ConfigLoader.load()
 
-    app.run(debug=True)
+    app.run(debug=False)

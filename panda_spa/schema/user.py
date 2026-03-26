@@ -3,7 +3,7 @@ from typing import Optional, Set
 
 from pydantic import BaseModel, Field, field_validator
 
-from panda_spa.validation import ServiceRegistryMeta
+from validation import ServiceRegistryMeta
 
 logger = logging.getLogger(__name__)
 

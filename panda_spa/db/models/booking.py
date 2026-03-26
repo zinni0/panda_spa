@@ -1,8 +1,7 @@
 from sqlalchemy import Column, Integer, ForeignKey, String, DateTime, Boolean
 from sqlalchemy.orm import relationship
 
-from panda_spa.db.database import Base
-
+from .. import Base
 
 class Booking(Base):
     """
@@ -17,7 +16,6 @@ class Booking(Base):
     :var finance_entry: optional transaction of the booking
     """
     __tablename__ = "bookings"
-    __table_args__ = {"extend_existing": True}
 
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
