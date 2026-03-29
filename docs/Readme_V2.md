@@ -72,6 +72,7 @@ Basierend auf der ISO 25010 liegt der Schwerpunkt der Architektur auf folgenden 
 
 **Sicherheit (Security):**
 Da das System nur von einem internen Mitarbeiter lokal bedient wird, wurde bewusst auf eine komplexe Login-Infrastruktur verzichtet. Zum Schutz der Datenintegrität existiert jedoch ein striktes Validierungs-Layer (mittels Pydantic), welches sicherstellt, dass keine fehlerhaften Eingaben aus dem Frontend in das Datenbank-Layer (SQLAlchemy) gelangen können.
+Da die Kundschaft des Spas Termine klassisch telefonisch oder vor Ort vereinbart, wurde bewusst auf einen Online-Zugang für Endkunden verzichtet. Dies spart Entwicklungsbudget, da ein für diesen Anwendungsfall unnötiger Login-Mechanismus entfällt. Die Sicherheit des Systems ergibt sich primär daraus, dass es isoliert lokal betrieben wird und von außen nicht erreichbar ist.
 
 **Wartbarkeit (Maintainability):**
 Das System ist in streng getrennte Schichten (Layer) unterteilt: Daten-Layer (DB), ORM-Layer, Validierungs-Layer (Pydantic), Service-Layer (Core/Managers) und Frontend-Layer (Flask). Diese Kapselung ermöglicht es beispielsweise, das Flask-Frontend jederzeit gegen eine REST-API auszutauschen, ohne die Geschäftslogik ändern zu müssen.
@@ -104,6 +105,8 @@ Der Panda öffnet das Dashboard. Das System aggregiert alle Transaktionen, berec
 Als Plattform für das Panda Spa wurde eine leichtgewichtige Web-Anwendung auf Basis von **Flask** gewählt. Da das System exklusiv von einem einzigen Mitarbeiter (dem Panda) lokal bedient wird, entfällt die Notwendigkeit für komplexe Authentifizierungsmechanismen oder externe Zugriffe.
 
 Eine Web-Applikation bietet gegenüber einer klassischen Desktop-GUI (wie Tkinter oder PyQt) den Vorteil, dass sie plattformunabhängig im Browser läuft und sich durch HTML/CSS sowie JavaScript (für die Chart.js-Visualisierung) wesentlich flexibler und moderner gestalten lässt. Gegen den Einsatz von Streamlit wurde sich entschieden, da Flask eine striktere Trennung von Backend-Routen und Frontend-Templates (`render_template`) ermöglicht, was perfekt zur modularen Architektur des Projekts passt. Die Performance ist in diesem lokalen Setup sekundär; entscheidend ist die Stabilität der Anwendung, die durch die Kapselung der Fehler gewährleistet wird.
+
+Aufgrund der geringen Größe der Anwendung ist die Performance der Software auf moderner Hardware nahezu irrelevant. Sollten Latenzen auftreten, wäre dies eher auf die lokale Hardware im Spa zurückzuführen, was durch einfache Hardware-Aufrüstung gelöst werden könnte, anstatt die Software-Komplexität zu erhöhen.
 
 ---
 
@@ -375,7 +378,7 @@ sequenceDiagram
 ## 4.4 Design Patterns und Prinzipien
 Der Code macht intensiven Gebrauch von etablierten Entwurfsmustern (Design Patterns) und Prinzipien, um eine saubere, wartbare Architektur zu gewährleisten:
 
-* **Factory Pattern:** Die Klasse `SpaServiceFactory` zentralisiert die Erstellung von Dienstleistungsobjekten. Anstatt Objekte direkt mit `Sauna()` aufzurufen, übergibt das System den Namen als String. Die Factory sucht in der Registry nach der Klasse, lädt die dynamischen Parameter (Preis, Dauer) aus dem `ConfigLoader` und gibt das fertige Objekt zurück.
+* **Factory Pattern:** Die Klasse `SpaServiceFactory` zentralisiert die Erstellung von Dienstleistungsobjekten. Anstatt Objekte direkt mit `Sauna()` aufzurufen, übergibt das System den Namen als String. Die Factory sucht in der Registry nach der Klasse, lädt die dynamischen Parameter (Preis, Dauer) aus dem `ConfigLoader` und gibt das fertige Objekt zurück. Das eingesetzte Factory Pattern sorgt dafür, dass Behandlungen automatisch als Instanz aus der Konfiguration erzeugt werden, was die manuelle Objektverwaltung minimiert.
 * **Registry & Metaclass Pattern:** Die Metaklasse `ServiceRegistryMeta` sammelt automatisch alle Klassen, die von `SpaService` erben. Das befreit den Entwickler davon, neue Dienstleistungen manuell in einer Liste eintragen zu müssen.
 * **Descriptor Pattern:** Der `RangeValueDescriptor` kapselt die Validierungslogik für Attribute (wie Temperaturen oder Intensitäten). Er greift selbstständig auf die Konfigurationsdatei zurück, um zulässige Min/Max-Werte zu prüfen, wodurch die eigentlichen Modellklassen (z. B. ThermalBath) extrem schlank bleiben.
 * **MVC (Model-View-Controller):** Die Anwendung trennt die Datenmodelle (SQLAlchemy in `models/`), die Darstellung (Jinja2 HTML-Templates in `web/templates/`) und die Steuerungslogik (Flask-Routen in `app.py` und Manager in `core/`) strikt voneinander.
