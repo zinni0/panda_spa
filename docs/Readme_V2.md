@@ -156,6 +156,86 @@ Die Kerngeschichte des Projekts dreht sich um den Panda (den Manager), der in se
 * **Booking (Der Termin):** Verbindet einen User mit einem SpaService zu einer bestimmten Zeit. Ein Termin belegt einen Zeit-Slot (start_time bis end_time) und besitzt einen Bezahlstatus (is_paid).
 * **FinanceEntry (Die Kasse des Pandas):** Repräsentiert die finanziellen Transaktionen. Einnahmen sind direkt an ein Booking geknüpft (booking_id), während Betriebsausgaben (wie frische Handtücher) unabhängig existieren können.
 
+``` mermaid
+classDiagram
+    %% Metaprogramming & Validation
+    class ServiceRegistryMeta {
+        <<Metaclass>>
+        -_registry: Dict
+        +__new__()
+        +get_registry()
+    }
+
+    class RangeValueDescriptor {
+        <<Descriptor>>
+        -_config_path: str
+        +__get__()
+        +__set__()
+    }
+
+    %% Database Models (SQLAlchemy)
+    class User {
+        +int id
+        +String name
+        +String species
+        +String favorite_service_name
+    }
+
+    class Booking {
+        +int id
+        +int user_id
+        +String service_name
+        +DateTime start_time
+        +DateTime end_time
+        +bool is_paid
+    }
+
+    class FinanceEntry {
+        +int id
+        +String type
+        +float amount
+        +String description
+        +DateTime date
+        +int booking_id
+    }
+
+    %% Core Services (Domain Logic)
+    class SpaService {
+        <<Abstract>>
+        <<metaclass: ServiceRegistryMeta>>
+        #float _price
+        #int _duration
+        +name() str
+        +get_description() str
+        +to_dict() dict
+    }
+
+    class ThermalBath {
+        <<RangeValueDescriptor>> _temperature
+    }
+    class Sauna {
+        <<RangeValueDescriptor>> _temperature
+    }
+    class AromaTherapy {
+        <<RangeValueDescriptor>> _intensity
+    }
+    class Massage
+
+    %% Relationships
+    User "1" -- "*" Booking : tätigt
+    Booking "1" -- "0..1" FinanceEntry : generiert Einnahme
+    
+    SpaService <|-- ThermalBath
+    SpaService <|-- Sauna
+    SpaService <|-- AromaTherapy
+    SpaService <|-- Massage
+
+    ThermalBath ..> RangeValueDescriptor : validiert Temperatur
+    Sauna ..> RangeValueDescriptor : validiert Temperatur
+    AromaTherapy ..> RangeValueDescriptor : validiert Intensität
+
+```
+
 ---
 
 ## 4.2 Verhaltensdiagramme: Activity- & State-Diagram
@@ -166,8 +246,45 @@ Das zentrale Zustandsobjekt in der Anwendung ist das Booking. Der Lebenszyklus i
 2. **Bezahlt / Abgeschlossen:** Nach der Behandlung erstellt der Panda eine Abrechnung (FinanceEntry vom Typ "income"). Durch diese Aktion wird der Status der Buchung in der Datenbank durch den FinanceManager auf is_paid = True aktualisiert.
 3. **Gelöscht:** Wird eine Buchung oder die zugehörige Transaktion storniert, ändert sich der Zustand entsprechend (z. B. Zurücksetzen auf unbezahlt oder vollständige Löschung aus der DB).
 
+``` mermaid
+stateDiagram-v2
+    [*] --> Offen : Panda erstellt Termin (is_paid = False)
+    
+    Offen --> Bezahlt : Panda rechnet ab (FinanceEntry 'income' erstellt)
+    
+    Offen --> Gelöscht : Panda storniert Termin (delete_booking)
+    Bezahlt --> Gelöscht : Panda storniert Termin oder Transaktion
+    
+    Gelöscht --> [*]
+```
+
+---
+
 **Aktivitätsmodellierung (Activity) – Eine Buchung anlegen:**
 Der Prozess beginnt mit der Dateneingabe durch den Panda. Zunächst validiert das Pydantic-Schema (BookingSchema) die Formalien (z. B. ist die Endzeit nach der Startzeit?). Anschließend lädt die SpaServiceFactory die Dauer der Behandlung aus der YAML-Config, um die Endzeit zu berechnen. Der BookingManager prüft danach, ob sich der neue Termin mit bestehenden Buchungen in der Datenbank überschneidet (_find_bookings). Nur wenn keine Konflikte bestehen, wird die Buchung persistent gespeichert.
+
+``` mermaid
+
+flowchart TD
+    Start([Start: Panda gibt Buchungsdaten im Frontend ein]) --> ValPydantic["Pydantic Schema Validierung"]
+    ValPydantic --> CheckFormal{"Formalien korrekt? <br> z.B. Endzeit > Startzeit"}
+    
+    CheckFormal -->|Nein| ErrorUI["Fehlermeldung im HTML rendern"]
+    
+    CheckFormal -->|Ja| Factory["SpaServiceFactory lädt Service & Dauer aus YAML"]
+    Factory --> CalcTime["BookingManager berechnet Endzeit"]
+    CalcTime --> DBCheck["BookingManager prüft DB auf Überschneidung"]
+    
+    DBCheck --> Conflict{"Termin-Konflikt?"}
+    
+    Conflict -->|Ja| Error409["Fehler 409: 'Zeitraum belegt' zurückgeben"]
+    Error409 --> ErrorUI
+    
+    Conflict -->|Nein| CreateUser["create_user() in DB ausführen"]
+    CreateUser --> CreateBooking["create_booking() in DB ausführen"]
+    CreateBooking --> Success(["Erfolg: Weiterleitung zu /manage-bookings"])
+
+```
 
 ---
 
@@ -181,6 +298,77 @@ Die Kommunikation zwischen den Objekten am Beispiel "Der Panda legt einen Termin
 5. Der Manager prüft via `_find_bookings` auf Datenbankebene, ob der Zeitraum frei ist.
 6. Sind alle Prüfungen bestanden, werden über die CRUD-Funktionen `create_user` und `create_booking` die Datensätze in SQLite geschrieben.
 7. Die Route leitet den Panda bei Erfolg auf die Übersichtsseite (`render_manage_bookings`) weiter.
+
+``` mermaid
+
+sequenceDiagram
+    autonumber
+    actor Panda
+
+    box "Frontend Layer" #LightCyan
+    participant UI as Flask UI (app.py)
+    end
+
+    box "Validation Layer" #LightYellow
+    participant Schema as BookingSchema
+    end
+
+    box "Service Layer" #MistyRose
+    participant Manager as BookingManager
+    participant Factory as SpaServiceFactory
+    end
+
+    box "Data Layer" #Lavender
+    participant DB as Database (SQLite)
+    end
+
+    Panda->>UI: POST /new-booking (Formulardaten)
+    activate UI
+    
+    UI->>Schema: Validiere Eingaben (Formalien)
+    activate Schema
+    
+    alt Eingaben ungültig
+        Schema-->>UI: ValidationError
+        UI-->>Panda: Zeige Formular mit Fehlerhinweis
+    else Eingaben gültig
+        Schema-->>UI: Validierte Daten
+        deactivate Schema
+        
+        UI->>Manager: create_booking(db, form_data)
+        activate Manager
+        
+        Manager->>Factory: create(data.service)
+        activate Factory
+        Note right of Factory: Lädt Dauer & Preis<br/>dynamisch aus services.yaml
+        Factory-->>Manager: Service-Instanz
+        deactivate Factory
+        
+        Manager->>DB: _find_bookings(start, end)
+        activate DB
+        
+        alt Konflikt gefunden
+            DB-->>Manager: Bestehende Buchung (Overlap)
+            Manager-->>UI: Status 409 + Fehlermeldung
+            UI-->>Panda: Zeige Fehler "Termin belegt"
+        else Kein Konflikt
+            DB-->>Manager: None (Freier Zeitraum)
+            
+            Manager->>DB: create_user()
+            DB-->>Manager: Neues User-Objekt
+            
+            Manager->>DB: create_booking()
+            DB-->>Manager: Neues Booking-Objekt
+            deactivate DB
+            
+            Manager-->>UI: Status 200 (Success)
+            deactivate Manager
+            UI-->>Panda: Redirect zu "Buchungen verwalten"
+        end
+    end
+    deactivate UI
+
+```
 
 ---
 
