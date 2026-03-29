@@ -81,16 +81,202 @@ Wahl einer Flask-Web-Applikation für Plattformunabhängigkeit im Browser und Fl
 * **Booking:** Verbindung von User, Service und Zeitraum.
 * **FinanceEntry:** Einnahmen (an Bookings geknüpft) und Ausgaben.
 
+``` mermaid
+classDiagram
+    %% Metaprogramming & Validation
+    class ServiceRegistryMeta {
+        <<Metaclass>>
+        -_registry: Dict
+        +__new__()
+        +get_registry()
+    }
+
+    class RangeValueDescriptor {
+        <<Descriptor>>
+        -_config_path: str
+        +__get__()
+        +__set__()
+    }
+
+    %% Database Models (SQLAlchemy)
+    class User {
+        +int id
+        +String name
+        +String species
+        +String favorite_service_name
+    }
+
+    class Booking {
+        +int id
+        +int user_id
+        +String service_name
+        +DateTime start_time
+        +DateTime end_time
+        +bool is_paid
+    }
+
+    class FinanceEntry {
+        +int id
+        +String type
+        +float amount
+        +String description
+        +DateTime date
+        +int booking_id
+    }
+
+    %% Core Services (Domain Logic)
+    class SpaService {
+        <<Abstract>>
+        <<metaclass: ServiceRegistryMeta>>
+        #float _price
+        #int _duration
+        +name() str
+        +get_description() str
+        +to_dict() dict
+    }
+
+    class ThermalBath {
+        <<RangeValueDescriptor>> _temperature
+    }
+    class Sauna {
+        <<RangeValueDescriptor>> _temperature
+    }
+    class AromaTherapy {
+        <<RangeValueDescriptor>> _intensity
+    }
+    class Massage
+
+    %% Relationships
+    User "1" -- "*" Booking : tätigt
+    Booking "1" -- "0..1" FinanceEntry : generiert Einnahme
+    
+    SpaService <|-- ThermalBath
+    SpaService <|-- Sauna
+    SpaService <|-- AromaTherapy
+    SpaService <|-- Massage
+
+    ThermalBath ..> RangeValueDescriptor : validiert Temperatur
+    Sauna ..> RangeValueDescriptor : validiert Temperatur
+    AromaTherapy ..> RangeValueDescriptor : validiert Intensität
+
+```
+
 ### 4.2 Verhaltens- und Interaktionsdiagramme
 * **State:** Lebenszyklus einer Buchung (Offen -> Bezahlt -> Gelöscht).
 * **Activity:** Validierung -> Zeitprüfung -> Persistierung.
 * **Sequence:** Fluss von der UI über den `BookingManager` zur `SpaServiceFactory` bis zur DB.
+
+```
+stateDiagram-v2
+    [*] --> Offen : Panda erstellt Termin (is_paid = False)
+    
+    Offen --> Bezahlt : Panda rechnet ab (FinanceEntry 'income' erstellt)
+    
+    Offen --> Gelöscht : Panda storniert Termin (delete_booking)
+    Bezahlt --> Gelöscht : Panda storniert Termin oder Transaktion
+    
+    Gelöscht --> [*]
+```
+
+``` mermaid
+
+flowchart TD
+    Start([Start: Panda gibt Buchungsdaten im Frontend ein]) --> ValPydantic["Pydantic Schema Validierung"]
+    ValPydantic --> CheckFormal{"Formalien korrekt? <br> z.B. Endzeit > Startzeit"}
+    
+    CheckFormal -->|Nein| ErrorUI["Fehlermeldung im HTML rendern"]
+    
+    CheckFormal -->|Ja| Factory["SpaServiceFactory lädt Service & Dauer aus YAML"]
+    Factory --> CalcTime["BookingManager berechnet Endzeit"]
+    CalcTime --> DBCheck["BookingManager prüft DB auf Überschneidung"]
+    
+    DBCheck --> Conflict{"Termin-Konflikt?"}
+    
+    Conflict -->|Ja| Error409["Fehler 409: 'Zeitraum belegt' zurückgeben"]
+    Error409 --> ErrorUI
+    
+    Conflict -->|Nein| CreateUser["create_user() in DB ausführen"]
+    CreateUser --> CreateBooking["create_booking() in DB ausführen"]
+    CreateBooking --> Success(["Erfolg: Weiterleitung zu /manage-bookings"])
+
+```
 
 ### 4.3 Design Patterns
 * **Factory Pattern:** Zentrale Erstellung von Dienstleistungsobjekten.
 * **Registry & Metaclass:** Automatische Klassenerfassung.
 * **Descriptor Pattern:** Kapselung der Validierungslogik für Attribute.
 * **MVC:** Trennung von Model, View und Controller.
+
+``` mermaid
+
+sequenceDiagram
+    autonumber
+    actor Panda
+
+    box "Frontend Layer" #LightCyan
+    participant UI as Flask UI (app.py)
+    end
+
+    box "Validation Layer" #LightYellow
+    participant Schema as BookingSchema
+    end
+
+    box "Service Layer" #MistyRose
+    participant Manager as BookingManager
+    participant Factory as SpaServiceFactory
+    end
+
+    box "Data Layer" #Lavender
+    participant DB as Database (SQLite)
+    end
+
+    Panda->>UI: POST /new-booking (Formulardaten)
+    activate UI
+    
+    UI->>Schema: Validiere Eingaben (Formalien)
+    activate Schema
+    
+    alt Eingaben ungültig
+        Schema-->>UI: ValidationError
+        UI-->>Panda: Zeige Formular mit Fehlerhinweis
+    else Eingaben gültig
+        Schema-->>UI: Validierte Daten
+        deactivate Schema
+        
+        UI->>Manager: create_booking(db, form_data)
+        activate Manager
+        
+        Manager->>Factory: create(data.service)
+        activate Factory
+        Note right of Factory: Lädt Dauer & Preis<br/>dynamisch aus services.yaml
+        Factory-->>Manager: Service-Instanz
+        deactivate Factory
+        
+        Manager->>DB: _find_bookings(start, end)
+        activate DB
+        
+        alt Konflikt gefunden
+            DB-->>Manager: Bestehende Buchung (Overlap)
+            Manager-->>UI: Status 409 + Fehlermeldung
+            UI-->>Panda: Zeige Fehler "Termin belegt"
+        else Kein Konflikt
+            DB-->>Manager: None (Freier Zeitraum)
+            
+            Manager->>DB: create_user()
+            DB-->>Manager: Neues User-Objekt
+            
+            Manager->>DB: create_booking()
+            DB-->>Manager: Neues Booking-Objekt
+            deactivate DB
+            
+            Manager-->>UI: Status 200 (Success)
+            deactivate Manager
+            UI-->>Panda: Redirect zu "Buchungen verwalten"
+        end
+    end
+    deactivate UI
+
+```
 
 ---
 
