@@ -166,7 +166,7 @@ classDiagram
 * **Activity:** Validierung -> Zeitprüfung -> Persistierung.
 * **Sequence:** Fluss von der UI über den `BookingManager` zur `SpaServiceFactory` bis zur DB.
 
-```
+``` mermaid
 stateDiagram-v2
     [*] --> Offen : Panda erstellt Termin (is_paid = False)
     
