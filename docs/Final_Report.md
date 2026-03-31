@@ -565,6 +565,6 @@ Die Anwendung ist als lokales Tool konzipiert und lässt sich mit wenigen Schrit
 ---
 
 ## 8.4 Pitch-Video
-Das Pitch-Video wurde separat erstellt. Es präsentiert die Vision des Panda Spas, demonstriert die Kernfunktionen der Benutzeroberfläche und visualisiert die wissenschaftlichen Erkenntnisse zur Metaprogrammierung aus dem Jupyter Notebook.
+Das Pitch-Video wurde separat erstellt. Es präsentiert die Vision des Panda Spas und demonstriert die Kernfunktionen der Benutzeroberfläche.
 
 ---
